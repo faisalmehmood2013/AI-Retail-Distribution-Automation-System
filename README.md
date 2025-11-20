@@ -17,13 +17,14 @@ A fully automated, intelligent retail distribution workflow that connects **What
 
 ---
 
-<div style="text-align: center; margin-top: 20px;">
+<div align="center">
   <video width="800" height="450" controls>
-    <source src="Retail Automation –Template\video.mp4" type="video/mp4">
+    <source src="Retail Automation –Template/video.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <p>Watch the demonstration video here.</p>
 </div>
+
 
 
 ## 1. 🧰 Tools & Technologies Used
