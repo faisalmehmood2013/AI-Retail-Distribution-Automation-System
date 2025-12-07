@@ -1,0 +1,509 @@
+{
+  "name": "3_Purchase_Order_Recieve_Order_Email_PO",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -832,
+        288
+      ],
+      "id": "275ce2f7-e1a8-4de6-b40b-fb202281767b",
+      "name": "When chat message received",
+      "webhookId": "963ca52c-6184-46c5-8611-33d63c275c4d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        512
+      ],
+      "id": "5ff53722-3ba8-4a48-afcb-6e136847787e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "voWUrDxcEWPhvT1D",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1585012146,
+          "mode": "list",
+          "cachedResultName": "Purchase Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1585012146"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now }}",
+            "product_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('product_id', ``, 'string') }}",
+            "product_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('product_name', ``, 'string') }}",
+            "size": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('size', ``, 'string') }}",
+            "category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category', ``, 'string') }}",
+            "qty_order": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('qty_order', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qty_order",
+              "displayName": "qty_order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -352,
+        512
+      ],
+      "id": "b87bdd05-acbf-40f8-9697-53cb5de8dc18",
+      "name": "Purchase Order",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "New Purchase Order from Nestle Distribution Multan",
+        "message": "={{ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        512
+      ],
+      "id": "8d63a526-9f69-478d-95cc-26a2710db732",
+      "name": "send an order",
+      "webhookId": "c72142e8-1329-494c-a0d3-0ddc2e574f55",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 564734544,
+          "mode": "list",
+          "cachedResultName": "Stock Received",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=564734544"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "product_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('product_id', ``, 'string') }}",
+            "product_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('product_name', ``, 'string') }}",
+            "size": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('size', ``, 'string') }}",
+            "category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category', ``, 'string') }}",
+            "qty_recieved": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('qty_recieved', ``, 'string') }}",
+            "cost_price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cost_price', ``, 'string') }}",
+            "total_cost": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('total_cost', ``, 'string') }}",
+            "expiry_date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('expiry_date', ``, 'string') }}",
+            "timestamp": "={{ $now }}",
+            "expiry_alert_sent": "No",
+            "invoice_no": "={{\"INV-\" + Date.now()}}",
+            "expairy_days_remaining": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('expairy_days_remaining', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "invoice_no",
+              "displayName": "invoice_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qty_recieved",
+              "displayName": "qty_recieved",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cost_price",
+              "displayName": "cost_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_cost",
+              "displayName": "total_cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expiry_date",
+              "displayName": "expiry_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expairy_days_remaining",
+              "displayName": "expairy_days_remaining",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "expiry_alert_sent",
+              "displayName": "expiry_alert_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -80,
+        512
+      ],
+      "id": "cb07dfb5-7a2a-482b-a6a9-4bb5bf92a227",
+      "name": "Stock Receive",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1502417477,
+          "mode": "list",
+          "cachedResultName": "Company Infomation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1502417477"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        512
+      ],
+      "id": "75a175e6-a4ef-4359-a82e-be3c8dc52cc9",
+      "name": "Supplier Information",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        512
+      ],
+      "id": "c06dc590-58e4-44d4-a059-52facbec52e3",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Smart Ordering Assistant for Nestlé Water Distribution.\nYour job is to help place supplier orders automatically.\n\nYou will get product details from the Company Information Sheet:\n\nID\tProduct Name\tSize\tCategory\n1\tNestle Water Pure Life\t500 ml\twater\n2\tNestle Water Pure Life\t1500 ml\twater\n3\tNestle Water Pure Life\t5 Litre\twater\n4\tNestle Water Pure Life\t19 Litre\twater\n\nYou will also fetch the Supplier Email from the Company Sheet and use it automatically when sending the order.\n\nYour job is to handle 2 tasks:\n\n1️⃣ Place Company Order\n2️⃣ Receive Stock\n\nMessages must be short, simple, and WhatsApp-style.\n\n📌 MAIN MENU (First Message)\n\nWhen customer says: hi, hello, salam, hey\n\nReply:\n\nHello! 👋\nWelcome to Nestlé Water Distribution.\nPlease choose an option:\n\n1️⃣ Place a New Order (Supplier)\n2️⃣ Receive Stock\n\nReply with the option number.\n\n1️⃣ PLACE A NEW ORDER (Supplier Order)\n\nOnly ask for two things:\n\nStep 1 — Ask for Product ID\n\n\"Please share the Product ID.\"\n\n(Valid IDs: 1, 2, 3, 4)\n\nIf ID is not valid → show list again.\n\nStep 2 — Ask for Quantity\n\n\"How many units do you want to order?\"\n\n📌 AUTO-FETCH LOGIC (Assistant Handles Automatically)\n\nAfter receiving Product ID + quantity, the assistant will automatically fetch:\n\n✓ Product Name\n✓ Size\n✓ Category\n✓ Supplier Email\n\nfrom the Company Information Sheet.\n\n📄 ORDER SUMMARY (Auto-Generated)\n\nAfter auto-fetching:\n\nHere is your order summary ✔️\n\n• Product ID: [ID]\n• Product: [Auto Product Name]\n• Size: [Auto Size]\n• Category: [Auto Category]\n• Quantity Ordered: [User Qty]\n\nPlease confirm to send order to the supplier.\nReply “Yes” to confirm or “No” to cancel.\n\n📧 AFTER CONFIRMATION\n\nIf user replies Yes:\n\nYour order has been confirmed ✔️\nOrder has been emailed to the supplier 📩\nAnd saved in the system.\n\nIf user replies No:\n\nOrder cancelled ❌\n\n🔁 Important Rules\n\n• Only ask for Product ID and Quantity\n• All other product details must be auto-filled from the Company Data Sheet\n• Supplier email must always be auto-fetched\n• Never send order without user confirmation\n• Keep replies short\n• WhatsApp-style simple language\n\n📌 SYSTEM PROMPT FOR PROFESSIONAL HTML EMAIL\n\nWhen sending the supplier order, always generate the email in clean HTML format using the following template:\n\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Purchase Order</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      background-color: #f6f8fa;\n      margin: 0;\n      padding: 20px;\n      color: #333;\n    }\n    .container {\n      max-width: 650px;\n      background: #ffffff;\n      margin: auto;\n      padding: 25px;\n      border-radius: 10px;\n      box-shadow: 0 3px 10px rgba(0,0,0,0.1);\n    }\n    h2 {\n      color: #0072ce;\n      margin-bottom: 10px;\n      text-align: center;\n    }\n    .section-title {\n      font-weight: bold;\n      margin-top: 30px;\n      color: #555;\n      font-size: 16px;\n      border-left: 4px solid #0072ce;\n      padding-left: 10px;\n    }\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-top: 15px;\n    }\n    th, td {\n      padding: 10px 12px;\n      border: 1px solid #ddd;\n      font-size: 14px;\n      text-align: left;\n    }\n    th {\n      background-color: #f0f4f8;\n    }\n    .footer {\n      text-align: center;\n      margin-top: 35px;\n      font-size: 12px;\n      color: #777;\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"container\">\n\n    <h2>Purchase Order – Nestlé Water Distribution</h2>\n\n    <p>Dear Supplier,</p>\n    <p>Please find below the new purchase order details:</p>\n\n    <div class=\"section-title\">Order Summary</div>\n\n    <table>\n      <tr>\n        <th>Product ID</th>\n        <td>{{product_id}}</td>\n      </tr>\n      <tr>\n        <th>Product Name</th>\n        <td>{{product_name}}</td>\n      </tr>\n      <tr>\n        <th>Size</th>\n        <td>{{size}}</td>\n      </tr>\n      <tr>\n        <th>Category</th>\n        <td>{{category}}</td>\n      </tr>\n      <tr>\n        <th>Quantity Ordered</th>\n        <td>{{quantity}}</td>\n      </tr>\n    </table>\n\n    <p class=\"section-title\">Notes</p>\n    <p>Please process this order at the earliest convenience.  \n    If there are any issues or delays, kindly notify us.</p>\n\n    <p class=\"footer\">\n      This email was generated automatically by Nestlé Water Distribution System.\n    </p>\n\n  </div>\n</body>\n</html>\n\n✅ How the Assistant Should Use This Template\n\nWhen sending the order email, replace:\n\n{{product_id}}\n\n{{product_name}}\n\n{{size}}\n\n{{category}}\n\n{{quantity}}\n\nWith actual values from the Company Information Sheet + user input.\n\n✅ Example Filled Email (for testing)\n\nIf user ordered:\n\nProduct ID: 4\n\nName: Nestle Water Pure Life\n\nSize: 19 Litre\n\nCategory: water\n\nQuantity: 50\n\nThen email will look extremely professional.\n\n\n2️⃣ RECEIVE STOCK (Warehouse Receiving)\n\nWhen user selects 2 — Receive Stock, ask only essential fields:\n\nStep 1 — Ask for Product ID\n\n\"Please share the Product ID.\"\n\n(Valid IDs: 1, 2, 3, 4)\n\nIf product ID is invalid → show list again.\n\nStep 2 — Ask for Quantity Received\n\n\"How many units did you receive?\"\n\nStep 3 — Ask for Cost Price\n\n\"What is the cost price per unit?\"\n\nStep 4 — Ask for Expiry Date\n\n\"Please share the expiry date (DD/MM/YYYY).\"\n\n✔️ AUTO-FETCH LOGIC (Assistant Handles Automatically)\n\nAfter receiving inputs, automatically fetch from Company Information Sheet:\n\n✓ Product Name\n✓ Size\n✓ Category\n\nThen generate a full stock-receiving summary.\n\n📦 STOCK RECEIVING SUMMARY\n\nAfter collecting and auto-filling:\n\nStock received successfully 📦\nHere are the details:\n\n• Product ID: {{product_id}}\n• Product: {{product_name}}\n• Size: {{size}}\n• Category: {{category}}\n• Quantity Received: {{quantity_received}}\n• Cost Price (per unit): Rs {{cost_price}}\n• Expiry Date: {{expiry_date}}\n\nInventory has been updated ✔️\n\n🟦 RULES\n\n• Only ask for: ID, Qty, Cost Price, Expiry\n• Fetch name, size, category automatically\n• Keep replies short and WhatsApp-friendly\n• After summary → Save to Google Sheet\n\n\nGENERAL RULES\n\n• Keep messages short\n• Use simple WhatsApp tone\n• No bold text\n• Use emojis lightly\n• Never ask unnecessary questions\n• Only ask the fields you listed\n• Always confirm after saving stock/order"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -368,
+        288
+      ],
+      "id": "c31c09a8-f02e-49c4-b8d4-cf46aaf27cbc",
+      "name": "Purchase Order Management"
+    },
+    {
+      "parameters": {
+        "content": "## Step 03: Purchase Order (PO), Receive Order and Email to Supplier\n- Channels (WhatsApp, Other Chat Apps, Website Live Chat)\n- PO Generation\n- Email to Supplier\n- Receiving Order (Update via Chat)\n- Updated Purchase Register",
+        "height": 592,
+        "width": 1088
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -880,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "bbcdb0e7-2373-4d6d-9d48-094ce2d52f85",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Purchase Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send an order": {
+      "ai_tool": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stock Receive": {
+      "ai_tool": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supplier Information": {
+      "ai_tool": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Purchase Order Management",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "Fn8Vm7qlydXTVCZe",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "736d72c5-092c-4245-8a03-ccd84a02acf3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "Fn8Vm7qlydXTVCZe",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

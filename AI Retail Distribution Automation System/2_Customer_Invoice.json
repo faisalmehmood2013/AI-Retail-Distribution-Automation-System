@@ -1,0 +1,712 @@
+{
+  "name": "2_Customer_Invoice",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1dd6550-802b-4150-9242-1cc5314f5b0f",
+              "name": "invoice no",
+              "value": "={{ $('Invoice Generation').item.json['invoice no'] }}",
+              "type": "string"
+            },
+            {
+              "id": "303480f2-635d-420c-a9c7-d09c8635e1c0",
+              "name": "date",
+              "value": "={{ $('Invoice Generation').item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "54e59829-c0d2-4a66-bef0-a6805ad17acb",
+              "name": "customer_name",
+              "value": "={{ $('Invoice Generation').item.json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "53d953b1-a263-433c-9e5f-24b4b126164f",
+              "name": "whatsapp_no",
+              "value": "={{ $('Invoice Generation').item.json.whatsapp_no }}",
+              "type": "string"
+            },
+            {
+              "id": "2981f5b8-d908-481d-aed5-cd4ab3ba68e5",
+              "name": "size",
+              "value": "={{ $('Invoice Generation').item.json.size }}",
+              "type": "string"
+            },
+            {
+              "id": "8ffe8ea1-d5e5-493a-8338-93c3ca5400dd",
+              "name": "product_name",
+              "value": "={{ $('Invoice Generation').item.json.product_name }}",
+              "type": "string"
+            },
+            {
+              "id": "b66df85f-2614-4841-90c0-fc5480938f2f",
+              "name": "address",
+              "value": "={{ $('Invoice Generation').item.json.address }}",
+              "type": "string"
+            },
+            {
+              "id": "88a01f88-dfce-44ed-b779-4a36296ff365",
+              "name": "quntity",
+              "value": "={{ $('Invoice Generation').item.json.quntity }}",
+              "type": "string"
+            },
+            {
+              "id": "1f6abeb5-2a4a-4bf7-b2c9-3e95d0e48818",
+              "name": "price",
+              "value": "={{ $('Invoice Generation').item.json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "40e90f7b-71cc-4ad6-8d13-16b01b209bdd",
+              "name": "price",
+              "value": "={{ $('Invoice Generation').item.json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "2d8f4647-cd95-43cb-b703-56e2b978211c",
+              "name": "total_amount",
+              "value": "={{ $('Invoice Generation').item.json.total_amount }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        -16
+      ],
+      "id": "8c011395-7aed-4122-b53f-44bb69386b5c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        624
+      ],
+      "id": "e0789e8e-217c-4fd1-b673-5945a450a3ab",
+      "name": "Customer Order",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "aIG2EywHf9tpxrXY",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1216227134,
+          "mode": "list",
+          "cachedResultName": "Invoice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1216227134"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "invoice no": "={{\"INV-\" + Date.now()}}\n",
+            "date": "={{ $today }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "whatsapp_no": "={{ $json.whatsapp_number }}",
+            "size": "={{ $json.size }}",
+            "product_name": "={{ $json.product_name }}",
+            "address": "={{ $json.address }}",
+            "quntity": "={{ $json.quntity }}",
+            "price": "={{ $json.price }}",
+            "total_amount": "={{ $json.total_price }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "invoice no",
+              "displayName": "invoice no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_no",
+              "displayName": "whatsapp_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quntity",
+              "displayName": "quntity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_amount",
+              "displayName": "total_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        -16
+      ],
+      "id": "3e0f20ea-387a-44bb-9577-6fe00cb5d719",
+      "name": "Invoice Generation",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1bSA8ggNyXcbka0x8evpLekN_E0qfEUbwtHVTntpTcx8",
+          "mode": "list"
+        },
+        "name": "=Invoice: {{ $json.customer_name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "649cce9c-bc4b-4add-9183-7a611bb80f73",
+      "name": "Invoice Template",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9wngTXqdXXaGKbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Customer Orders').item.json.customer_name }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "12eiGBhKPQ6rt4sINuPw0IESTKd1HSvWV",
+            "mode": "list",
+            "cachedResultName": "Distribution Retail Business Automation",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/12eiGBhKPQ6rt4sINuPw0IESTKd1HSvWV"
+          },
+          "whatToSearch": "files",
+          "includeTrashed": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        240
+      ],
+      "id": "3c73b9b6-93d4-48d3-8ba0-a84507507b51",
+      "name": "Search Invoice",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9wngTXqdXXaGKbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        240,
+        240
+      ],
+      "id": "412c05cd-d7ea-460f-86ee-d9b13df1e580",
+      "name": "Download Invoice",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9wngTXqdXXaGKbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Customer Orders').item.json.email }}",
+        "subject": "=Hi {{ $('Invoice Generation').item.json.customer_name }}, Your Invoice # {{ $('Invoice Generation').item.json['invoice no'] }} is Attached",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\" style=\"margin:0;padding:0;\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n  <title>Invoice Email</title>\n  <style>\n    body { \n      margin:0; \n      padding:0; \n      background:#f4f6f8; \n      font-family:Arial, Helvetica, sans-serif; \n      color:#333;\n    }\n    .wrapper {\n      width:100%;\n      background:#f4f6f8;\n      padding:20px 0;\n    }\n    .container {\n      max-width:650px;\n      margin:0 auto;\n      background:#ffffff;\n      border-radius:8px;\n      overflow:hidden;\n      box-shadow:0 4px 18px rgba(0,0,0,0.08);\n    }\n    .header {\n      background:#0ea5a7;\n      padding:22px;\n      text-align:left;\n      color:#ffffff;\n    }\n    .header h1 {\n      margin:0;\n      font-size:20px;\n      letter-spacing:0.3px;\n    }\n    .content {\n      padding:28px;\n      font-size:15px;\n      line-height:1.6;\n      color:#333333;\n    }\n    .invoice-box {\n      margin:18px 0;\n      padding:16px;\n      border:1px solid #e5e7eb;\n      background:#f9fafb;\n      border-radius:6px;\n    }\n    .invoice-box table {\n      width:100%;\n      font-size:14px;\n    }\n    .invoice-box td {\n      padding:4px 0;\n    }\n    .btn {\n      display:inline-block;\n      margin-top:20px;\n      padding:12px 20px;\n      background:#0ea5a7;\n      color:#ffffff;\n      text-decoration:none;\n      border-radius:6px;\n      font-weight:bold;\n      font-size:14px;\n    }\n    .footer {\n      background:#fafafa;\n      padding:18px 28px;\n      font-size:12px;\n      color:#777;\n      border-top:1px solid #ececec;\n      text-align:center;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n    <div class=\"container\">\n\n      <!-- Header -->\n      <div class=\"header\">\n        <h1>Your Invoice is Ready</h1>\n      </div>\n\n      <!-- Content -->\n      <div class=\"content\">\n        <p>Dear <strong>{{ $('Edit Fields').item.json.customer_name }}</strong>,</p>\n\n        <p>\n          Thank you for choosing our services.  \n          Please find your invoice for the recent order attached with this email.  \n          Below are the key details for your reference:\n        </p>\n\n        <!-- Invoice Summary Box -->\n        <div class=\"invoice-box\">\n          <table>\n            <tr>\n              <td><strong>Invoice Number:</strong></td>\n              <td>{{ $('Edit Fields').item.json['invoice no'] }}</td>\n            </tr>\n            <tr>\n              <td><strong>Date:</strong></td>\n              <td>{{ $('Edit Fields').item.json.date }}</td>\n            </tr>\n            <tr>\n              <td><strong>Amount:</strong></td>\n              <td>{{ $('Edit Fields').item.json.total_amount }}</td>\n            </tr>\n          </table>\n        </div>\n\n        <p>\n          If the attachment is not visible, you can also download the invoice online using the button below:\n        </p>\n\n        <a class=\"btn\" href=\"{{DownloadLink}}\" target=\"_blank\">Download Invoice</a>\n\n        <p style=\"margin-top:24px;\">\n          For any corrections, clarifications, or queries related to this invoice,  \n          feel free to reply to this email — we will be happy to assist you.\n        </p>\n\n        <p style=\"margin-top:26px;\">\n          Best regards,<br>\n          <strong>Your Company Name</strong><br>\n          support@yourcompany.com<br>\n          +92 300 0000000\n        </p>\n      </div>\n\n      <!-- Footer -->\n      <div class=\"footer\">\n        This email contains confidential information intended only for {{ $('Edit Fields').item.json.customer_name }}.  \n        If you received it in error, kindly delete it immediately.\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>\n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        240
+      ],
+      "id": "10988808-c22d-4f46-8bc7-762bf713287b",
+      "name": "Send Invoice",
+      "webhookId": "7029acfd-273a-4831-aaff-dad16b4b02f7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Search Invoice').item.json.id }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1smihZrFcRNc-y9QdXMVIulxzmLbwQkFB",
+          "mode": "list",
+          "cachedResultName": "Nestle Invoive",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1smihZrFcRNc-y9QdXMVIulxzmLbwQkFB"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        688,
+        240
+      ],
+      "id": "469fc0c8-68de-4c95-a251-79c49123c018",
+      "name": "Move Invoice",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9wngTXqdXXaGKbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "{invoice no}",
+              "replaceText": "={{ $('Edit Fields').item.json['invoice no'] }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{date}",
+              "replaceText": "={{ $('Edit Fields').item.json.date }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{customer_name}",
+              "replaceText": "={{ $('Edit Fields').item.json.customer_name }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{whatsapp_no}",
+              "replaceText": "={{ $('Edit Fields').item.json.whatsapp_no }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{size}",
+              "replaceText": "={{ $('Edit Fields').item.json.size }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{address}",
+              "replaceText": "={{ $('Edit Fields').item.json.address }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{quntity}",
+              "replaceText": "={{ $('Edit Fields').item.json.quntity }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{price}",
+              "replaceText": "={{ $('Edit Fields').item.json.price }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{total_amount}",
+              "replaceText": "={{ $('Edit Fields').item.json.total_amount }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "{product_name}",
+              "replaceText": "={{ $('Edit Fields').item.json.product_name }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        240
+      ],
+      "id": "749da52c-80d1-49c7-a128-6edbeb9fc435",
+      "name": "Update Invoice",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "JZTaZdHcp19MuAJt",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "93b99c17-6fc6-417f-b1d4-84660626ce5c",
+      "name": "Daily Invoices -- 07:00 PM"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "e321c9ad-64af-477d-8d24-a0d2f8d6dca1",
+      "name": "Customer Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 Step 02: Invoice Process & Email to Customer\n- Daily Invoice Generation (Daily 07:00 PM)\n- System Processing (The system automatically generates a formal Invoice for each completed order.)\n- Automated Email Invoice to the Customer\n",
+        "height": 640,
+        "width": 1264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "ef37b7b1-9d37-4ca1-939a-79b6b42958ef",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Invoice Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Order": {
+      "main": [
+        []
+      ]
+    },
+    "Invoice Generation": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Template": {
+      "main": [
+        [
+          {
+            "node": "Update Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Invoice": {
+      "main": [
+        [
+          {
+            "node": "Download Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Invoice": {
+      "main": [
+        [
+          {
+            "node": "Send Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Invoice": {
+      "main": [
+        [
+          {
+            "node": "Move Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Invoice": {
+      "main": [
+        [
+          {
+            "node": "Search Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Invoices -- 07:00 PM": {
+      "main": [
+        [
+          {
+            "node": "Customer Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Orders": {
+      "main": [
+        [
+          {
+            "node": "Invoice Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": 3600,
+    "timeSavedPerExecution": 0,
+    "errorWorkflow": "XKU6YhXNwS5QfXSJ"
+  },
+  "versionId": "2b88925a-44ad-4107-b691-ca6751f9ad75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "XKU6YhXNwS5QfXSJ",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

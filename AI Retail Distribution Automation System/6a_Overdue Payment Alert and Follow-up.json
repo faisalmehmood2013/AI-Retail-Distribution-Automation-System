@@ -1,0 +1,307 @@
+{
+  "name": "6a_Overdue Payment Alert and Follow-up",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-2",
+              "name": "email_subject",
+              "value": "=Payment Reminder - Order {{ $json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "email_body",
+              "value": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\" />\n    <title>Payment Due Reminder</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background-color: #f4f6f8;\n            margin: 0;\n            padding: 0;\n            color: #333;\n        }\n        .container {\n            max-width: 650px;\n            margin: 40px auto;\n            background: #ffffff;\n            padding: 25px 35px;\n            border-radius: 10px;\n            box-shadow: 0 4px 12px rgba(0,0,0,0.08);\n        }\n        .header {\n            border-bottom: 2px solid #0077b6;\n            margin-bottom: 25px;\n            padding-bottom: 10px;\n        }\n        .header h2 {\n            margin: 0;\n            color: #0077b6;\n            font-size: 24px;\n        }\n        .section-title {\n            margin-top: 20px;\n            font-weight: bold;\n            font-size: 16px;\n            color: #444;\n        }\n        .details-table {\n            width: 100%;\n            margin-top: 10px;\n            border-collapse: collapse;\n        }\n        .details-table td {\n            padding: 8px 5px;\n            border-bottom: 1px solid #e6e6e6;\n            font-size: 14px;\n        }\n        .highlight {\n            font-weight: bold;\n            color: #d00000;\n        }\n        .footer {\n            margin-top: 30px;\n            font-size: 13px;\n            color: #777;\n            border-top: 1px solid #ddd;\n            padding-top: 15px;\n        }\n    </style>\n</head>\n\n<body>\n\n<div class=\"container\">\n\n    <div class=\"header\">\n        <h2>📌 Payment Due Reminder</h2>\n    </div>\n\n    <p>Dear <strong>{{ $json.customer_name }}</strong>,</p>\n\n    <p>\n        We hope you are doing well. This is a gentle reminder that your payment is \n        currently pending and requires your attention.\n    </p>\n\n    <div class=\"section-title\">🧾 Invoice Details</div>\n\n    <table class=\"details-table\">\n        <tr>\n            <td><strong>Invoice No:</strong></td>\n            <td>{{ $('Get Invoice Data').item.json['invoice no'] }}</td>\n        </tr>\n        <tr>\n            <td><strong>Invoice Date:</strong></td>\n            <td>{{ $('Get Invoice Data').item.json.date }}</td>\n        </tr>\n        <tr>\n            <td><strong>Amount Due:</strong></td>\n            <td class=\"highlight\">{{ $json.balance }}</td>\n        </tr>\n        <tr>\n            <td><strong>Due Date:</strong></td>\n            <td>{{ $json.due_date }}</td>\n        </tr>\n    </table>\n\n    <p>\n        Kindly ensure that the payment is cleared at your earliest convenience\n        to avoid any service interruption.\n    </p>\n\n    <p>\n        If you have already made the payment, please disregard this message.\n    </p>\n\n    <div class=\"footer\">\n        Regards,<br>\n        <strong>Nestle Water Distribution Multan</strong><br>\n        Thank you for your continued partnership.\n    </div>\n\n</div>\n\n</body>\n</html>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c611e9f0-50e6-4ba4-9bf0-3b66881f043f",
+      "name": "Prepare Reminder Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -496,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get Panding Payment').item.json.customer_email }}",
+        "subject": "={{ $json.email_subject }}",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "b6dba962-973e-4d08-a5f4-50612b728a78",
+      "name": "Send Gmail Reminder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        640
+      ],
+      "webhookId": "09924880-3deb-4095-b76e-73f0e6147ddc",
+      "executeOnce": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "487e7ab5-d2f1-4cec-b91a-1697c805c4a5",
+              "leftValue": "={{ $json.payment_status }}",
+              "rightValue": "Paid",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -720,
+        736
+      ],
+      "id": "25341f6b-dd80-4ba8-9495-1fdf9de8c968",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1392,
+        736
+      ],
+      "id": "5ca2f863-97cc-484e-9cd5-2f550eef9901",
+      "name": "Daily 01:00 PM trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1168522813,
+          "mode": "list",
+          "cachedResultName": "Payment",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1168522813"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -944,
+        736
+      ],
+      "id": "b1f6f423-a1df-453b-870a-733f3019d5de",
+      "name": "Get Panding Payment",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1216227134,
+          "mode": "list",
+          "cachedResultName": "Invoice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1216227134"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1168,
+        736
+      ],
+      "id": "698b1393-6141-422a-b2ef-bc8902bb076d",
+      "name": "Get Invoice Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "={{ $json.email_subject }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\" />\n    <title>Urgent Payment Collection Required</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background-color: #f2f4f7;\n            margin: 0;\n            padding: 0;\n            color: #333;\n        }\n        .container {\n            max-width: 650px;\n            margin: 40px auto;\n            background: #ffffff;\n            padding: 25px 35px;\n            border-radius: 12px;\n            box-shadow: 0 4px 12px rgba(0,0,0,0.08);\n        }\n        .header {\n            border-left: 5px solid #d00000;\n            padding-left: 15px;\n            margin-bottom: 25px;\n        }\n        .header h2 {\n            margin: 0;\n            color: #d00000;\n            font-size: 24px;\n        }\n        .section-title {\n            margin-top: 20px;\n            font-weight: bold;\n            font-size: 16px;\n            color: #444;\n        }\n        .details-table {\n            width: 100%;\n            margin-top: 10px;\n            border-collapse: collapse;\n        }\n        .details-table td {\n            padding: 8px 5px;\n            border-bottom: 1px solid #e6e6e6;\n            font-size: 14px;\n        }\n        .highlight {\n            font-weight: bold;\n            color: #d00000;\n        }\n        .footer {\n            margin-top: 30px;\n            font-size: 13px;\n            color: #777;\n            border-top: 1px solid #ddd;\n            padding-top: 15px;\n        }\n    </style>\n</head>\n\n<body>\n\n<div class=\"container\">\n\n    <div class=\"header\">\n        <h2>🚨 Urgent: Payment Collection Required</h2>\n    </div>\n\n    <p>Dear Sales Team,</p>\n\n    <p>\n        The following customer has an outstanding payment that requires immediate follow-up.  \n        Please contact the customer and collect the pending amount on priority.\n    </p>\n\n    <div class=\"section-title\">🧾 Customer & Payment Details</div>\n\n    <table class=\"details-table\">\n        <tr>\n            <td><strong>Customer Name:</strong></td>\n            <td>{{ $json.customer_name }}</td>\n        </tr>\n        <tr>\n            <td><strong>Customer Contact:</strong></td>\n            <td>{{ $('Get Invoice Data').item.json.whatsapp_no }}</td>\n        </tr>\n        <tr>\n            <td><strong>Invoice No:</strong></td>\n            <td>{{ $('Get Invoice Data').item.json['invoice no'] }}</td>\n        </tr>\n        <tr>\n            <td><strong>Invoice Date:</strong></td>\n            <td>{{ $('Get Invoice Data').item.json.date }}</td>\n        </tr>\n        <tr>\n            <td><strong>Amount Due:</strong></td>\n            <td class=\"highlight\">{{ $('Get Panding Payment').item.json.balance }}</td>\n        </tr>\n        <tr>\n            <td><strong>Due Date:</strong></td>\n            <td>{{ $json.due_date }}</td>\n        </tr>\n    </table>\n\n    <p>\n        Kindly update the status once the payment is collected or if there is any issue \n        in reaching the customer.\n    </p>\n\n    <div class=\"footer\">\n        Regards,<br>\n        <strong>Nestle Water Distribution Multan</strong><br>\n        Finance Department\n    </div>\n\n</div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        832
+      ],
+      "id": "f84705c5-6926-45b6-a412-f66eb1bc50c3",
+      "name": "Send to Sales team",
+      "webhookId": "61c2093b-e566-4f1a-8446-8177530526be",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🔔 Step 12: Overdue Payment Alert and Follow-up\n- Daily Check: A system workflow is triggered daily (e.g., early morning) to scan the records in the Payment Register\n- Condition Filter: The system identifies all orders where the payment 'Status' is \"Pending\" and the recorded Due Date (15 days) has expired.\n- Customer Reminder Email\n- Sales Team Alert (Email)",
+        "height": 496,
+        "width": 1440,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1472,
+        496
+      ],
+      "typeVersion": 1,
+      "id": "45ecdeb6-05f7-4578-8e65-925f28e687ed",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepare Reminder Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Sales team",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Gmail Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Prepare Reminder Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 01:00 PM trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Invoice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Panding Payment": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Invoice Data": {
+      "main": [
+        [
+          {
+            "node": "Get Panding Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Sales team": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "timeSavedPerExecution": 0,
+    "errorWorkflow": "eQrwB3hDjiS4mA0E"
+  },
+  "versionId": "905bf487-dfbd-485f-802e-274eb955ac03",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "eQrwB3hDjiS4mA0E",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

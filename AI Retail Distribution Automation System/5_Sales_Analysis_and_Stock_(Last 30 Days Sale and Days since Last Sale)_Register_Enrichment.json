@@ -1,0 +1,680 @@
+{
+  "name": "5_Sales_Analysis_and_Stock_(Last 30 Days Sale and Days since Last Sale)_Register_Enrichment",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c6b34bd-a96a-44b1-a555-3936a1824ff7",
+              "name": "product_id",
+              "value": "={{ $json.product_id }}",
+              "type": "string"
+            },
+            {
+              "id": "d56272a5-f37b-4181-b61f-d75d109b0f36",
+              "name": "timestamp",
+              "value": "={{$json[\"timestamp\"].replace(/\\s/g, \"\").replace(/\\\"/g, \"\").trim()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        192
+      ],
+      "id": "61bb4e44-18be-4633-bf07-593673df827a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Find Max Date (MAX Aggregation Replacement)\nconst latestSales = {};\n\nfor (const item of items) {\n    const productId = String(item.json['product_id']);\n    const timestampStr = item.json['timestamp'];\n    \n    if (!productId || typeof timestampStr !== 'string') continue;\n\n    const orderDate = new Date(timestampStr);\n    \n    // Invalid Date ya missing data ko skip karein\n    if (isNaN(orderDate.getTime())) continue; \n\n    // Date ko Milliseconds mein badalna\n    const currentTime = orderDate.getTime();\n    \n    // Sab se nai tareekh ki pehchaan\n    if (!latestSales[productId] || currentTime > latestSales[productId].time) {\n        latestSales[productId] = {\n            product_id: productId,\n            // Sab se nai timestamp string ko store karein\n            latest_sale_timestamp: timestampStr, \n            time: currentTime\n        };\n    }\n}\n\nconst output = [];\n// Sirf latest timestamp wale items ko output karein\nfor (const key in latestSales) {\n    output.push({\n        json: {\n            product_id: latestSales[key].product_id,\n            latest_sale_timestamp: latestSales[key].latest_sale_timestamp \n        }\n    });\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        192
+      ],
+      "id": "fa5e59d6-520d-41d8-acee-8eee773323bf",
+      "name": "Find Max Date"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Calculate Days Difference\nconst MS_PER_DAY = 1000 * 60 * 60 * 24;\n\nconst today = new Date();\ntoday.setHours(0, 0, 0, 0); \nconst todayTime = today.getTime(); \n\nfor (const item of items) {\n    // Note: 'latest_sale_timestamp' yahan Node 4.b (Find Max Date) se aa raha hai\n    const latestTimestamp = item.json['latest_sale_timestamp'];\n    \n    if (!latestTimestamp || typeof latestTimestamp !== 'string') continue;\n\n    const latestDate = new Date(latestTimestamp);\n    \n    if (isNaN(latestDate.getTime())) continue; \n\n    // Date ko UTC components se normalize karna\n    const saleDate = new Date(latestDate.getUTCFullYear(), \n                              latestDate.getUTCMonth(), \n                              latestDate.getUTCDate());\n    const saleTime = saleDate.getTime();\n    \n    // Days Since Last Sale Calculate Karna\n    const diffTime = Math.abs(todayTime - saleTime);\n    const diffDays = Math.ceil(diffTime / MS_PER_DAY);\n    \n    item.json['days_since_last_sale'] = diffDays === 0 ? 0 : diffDays;\n    \n    // Output ke liye sirf zaroori fields rakhein\n    item.json['product_id'] = item.json['product_id'];\n    delete item.json['latest_sale_timestamp'];\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        192
+      ],
+      "id": "1c62187d-bfa1-47c0-aed8-57d76aac32bb",
+      "name": "Calculate Days Diff"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335712669,
+          "mode": "list",
+          "cachedResultName": "Stock Register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1335712669"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "product_id": "={{ $json.product_id }}",
+            "last_30_days_sale": "={{ $json.last_30_days_sale }}"
+          },
+          "matchingColumns": [
+            "product_id"
+          ],
+          "schema": [
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "purchase_stock",
+              "displayName": "purchase_stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sale_stock",
+              "displayName": "sale_stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "current_stock",
+              "displayName": "current_stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cost_price",
+              "displayName": "cost_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sale_price",
+              "displayName": "sale_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_purchase",
+              "displayName": "total_purchase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_sale",
+              "displayName": "total_sale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reorder_level",
+              "displayName": "reorder_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "need_to_reorder",
+              "displayName": "need_to_reorder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_30_days_sale",
+              "displayName": "last_30_days_sale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "days_since_last_sale",
+              "displayName": "days_since_last_sale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "6614735f-64ba-4bd5-a869-9a313bab2559",
+      "name": "Update Stock Register (last 30 days sale)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335712669,
+          "mode": "list",
+          "cachedResultName": "Stock Register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1335712669"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "product_id": "={{ $json.product_id }}",
+            "days_since_last_sale": "={{ $json.days_since_last_sale }}"
+          },
+          "matchingColumns": [
+            "product_id"
+          ],
+          "schema": [
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "purchase_stock",
+              "displayName": "purchase_stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sale_stock",
+              "displayName": "sale_stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "current_stock",
+              "displayName": "current_stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cost_price",
+              "displayName": "cost_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sale_price",
+              "displayName": "sale_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_purchase",
+              "displayName": "total_purchase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_sale",
+              "displayName": "total_sale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reorder_level",
+              "displayName": "reorder_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "need_to_reorder",
+              "displayName": "need_to_reorder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_30_days_sale",
+              "displayName": "last_30_days_sale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "days_since_last_sale",
+              "displayName": "days_since_last_sale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        192
+      ],
+      "id": "2575d558-e411-47be-9c37-45b221aa4920",
+      "name": "Update Stock Register (days_since_last_sale)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📊 Step 08: Sales Analysis and Stock (Last 30 Days Sale and Days since Last Sale) Register Enrichment\n- Workflow Activation (Daily 09:00 AM)\n- Delivered Order Filter (filters for all customers whose orders have been confirmed as \"Delivered\" (as per Step 07).)\n- Data Calculation 1 (Last 30 Days Sale)\n- Data Calculation 2 (Days Since Last Sale)\n- Stock Register Update (Last 30 Days Sale, Days Since Last Sale)\n\n**Objective:**\nThis provides the inventory team with actionable sales context directly in the stock management interface, aiding in demand forecasting and proactive stock alerts.",
+        "height": 592,
+        "width": 1424,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -544,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "22d429d5-7230-4d33-8955-e379b74f6a29",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Delivered"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "ca6f0625-c1c4-42e6-b4f8-275052e51fd7",
+      "name": "Get Customer Order (Dilevered)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Filter Last 30 Days Sales (Using String Comparison for Robustness)\nconst itemsInLast30Days = [];\nconst today = new Date();\nconst thirtyDaysAgo = new Date();\n\n// 1. 30 din pehle ki tareekh nikalna\nthirtyDaysAgo.setDate(today.getDate() - 30); \n\n// 2. Aaj aur 30 din pehle ki tareekhon ko YYYY-MM-DD string mein badalna\n// Note: toISOString() hamesha UTC time deta hai. Yehi wajah hai ki hum sirf tareekh (substring) par compare kar sakte hain.\n\nconst todayStr = today.toISOString().substring(0, 10); // e.g., \"2025-11-28\"\nconst thirtyDaysAgoStr = thirtyDaysAgo.toISOString().substring(0, 10); // e.g., \"2025-10-29\"\n\nfor (const item of items) {\n    const timestampStr = item.json['timestamp'];\n    \n    // Error Handling\n    if (!timestampStr || typeof timestampStr !== 'string') continue;\n    \n    // 3. Order ki tareekh ka YYYY-MM-DD string nikalna\n    // \"2025-11-20T09:32:03.578Z\" se sirf \"2025-11-20\" nikalna\n    const orderDateStr = timestampStr.substring(0, 10); \n    \n    // 4. Core Logic: String Comparison (YYYY-MM-DD format mein string comparison theek kaam karta hai)\n    // Check: Order ki tareekh 30 din pehle ki tareekh se barabar ya zyada hai\n    if (orderDateStr >= thirtyDaysAgoStr) {\n        itemsInLast30Days.push(item);\n    }\n}\n\nreturn itemsInLast30Days;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3a4ea83c-af68-41a0-bc13-082d15179052",
+      "name": "Filter Last 30 Days"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Custom Aggregation (Replacing Aggregate Node)\nconst aggregatedSales = {};\n\n// 1. Har item par loop lagayen aur sale ko product_id ke hisaab se jama karein\nfor (const item of items) {\n  const productId = item.json['product_id'];\n  const quantity = item.json['quntity'] || 0; // quantity field use kiya gaya\n  \n  if (productId) {\n    if (aggregatedSales[productId]) {\n      // Agar product_id pehle se maujood hai, to quantity add kar dein\n      aggregatedSales[productId].sale_sum += quantity;\n    } else {\n      // Agar naya product_id hai, to object banayen\n      aggregatedSales[productId] = {\n        product_id: productId,\n        product_name: item.json['product_name'], // Name bhi utha liya taake update mein asani ho\n        sale_sum: quantity\n      };\n    }\n  }\n}\n\nconst output = [];\n\n// 2. Jama kiye hue data ko n8n ke output format mein tabdeel karna\nfor (const key in aggregatedSales) {\n  const item = aggregatedSales[key];\n  \n  // Output format mein last_30_days_sale set karna\n  item.last_30_days_sale = item.sale_sum;\n  \n  output.push({\n    json: item\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c35d2ff0-3cc6-4aa0-aa30-9f2632fc60fa",
+      "name": "Aggregate Sales (Product Wise)"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "91125feb-d18e-421c-9aa9-1de76f244f20",
+      "name": "Daily 09:00 AM Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Find Max Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Max Date": {
+      "main": [
+        [
+          {
+            "node": "Calculate Days Diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Days Diff": {
+      "main": [
+        [
+          {
+            "node": "Update Stock Register (days_since_last_sale)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Order (Dilevered)": {
+      "main": [
+        [
+          {
+            "node": "Filter Last 30 Days",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Last 30 Days": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Sales (Product Wise)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Sales (Product Wise)": {
+      "main": [
+        [
+          {
+            "node": "Update Stock Register (last 30 days sale)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 09:00 AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Customer Order (Dilevered)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "LiSDFHh0cxKCIM63",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "aa9c368c-95c3-4ca4-8a0e-d2bda6397dc8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "LiSDFHh0cxKCIM63",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

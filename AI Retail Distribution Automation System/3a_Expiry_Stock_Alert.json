@@ -1,0 +1,380 @@
+{
+  "name": "3a_Expiry_Stock_Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 564734544,
+          "mode": "list",
+          "cachedResultName": "Stock Received",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=564734544"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        240
+      ],
+      "id": "7ce140c3-7abb-4f65-ae2b-cef1d645ff76",
+      "name": "Stock Received",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "aIG2EywHf9tpxrXY",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "Expiry Risk Notification – Immediate Attention Required",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Expiry Alert</title>\n<style>\n  body {\n    margin: 0;\n    padding: 0;\n    background-color: #f6f7f9;\n    font-family: Arial, Helvetica, sans-serif;\n  }\n  .container {\n    max-width: 650px;\n    margin: 25px auto;\n    background: #ffffff;\n    border-radius: 10px;\n    padding: 25px;\n    box-shadow: 0 4px 20px rgba(0,0,0,0.08);\n    border-left: 6px solid #dc2626;\n  }\n  h2 {\n    margin-top: 0;\n    color: #dc2626;\n    font-size: 22px;\n  }\n  .alert-box {\n    background: #fef2f2;\n    border: 1px solid #fecaca;\n    padding: 15px;\n    border-radius: 8px;\n    margin: 18px 0;\n    font-size: 15px;\n    color: #333;\n    white-space: pre-line; /* preserves line breaks */\n  }\n  p {\n    font-size: 15px;\n    color: #333;\n    line-height: 1.7;\n  }\n  .footer {\n    font-size: 12px;\n    color: #777;\n    margin-top: 25px;\n    text-align: center;\n  }\n</style>\n</head>\n<body>\n\n<div class=\"container\">\n\n  <h2>🚨 Expiry Stock Alert</h2>\n\n  <!-- Dynamic Message -->\n  <div class=\"alert-box\">\n    {{ $json.ExpiryAlertMessage }}\n  </div>\n\n  <p>\n    Please take immediate action to manage the expiring items and prevent potential losses.\n  </p>\n\n  <p>Regards,<br>\n  <strong>Nestle Water Distribution Multan</strong></p>\n\n  <div class=\"footer\">\n    This is an automated alert. No reply is required.\n  </div>\n\n</div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        240
+      ],
+      "id": "02374cbf-191d-4b83-88a9-a2d3b813fe25",
+      "name": "Send mail - Expairy Stock",
+      "webhookId": "1c0d35ed-c635-4104-97ea-0857845dd27e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Expiry Check Logic (Professional English Format)\nconst itemsExpiringSoon = [];\nconst daysThreshold = 30; // Set threshold to 30 days\n\n// Get today's date and reset time for accurate comparison\nconst today = new Date();\ntoday.setHours(0, 0, 0, 0);\n\n// Calculate the expiry deadline (60 days from today)\nconst expiryDeadline = new Date();\nexpiryDeadline.setDate(today.getDate() + daysThreshold);\nexpiryDeadline.setHours(0, 0, 0, 0);\n\nfor (const item of items) {\n  // Extract required data using your column names\n  const expiryDateStr = item.json['expiry_date'];\n  const stock = item.json['qty_recieved'] || 0;\n  \n  // Skip if no expiry date or zero stock\n  if (!expiryDateStr || stock <= 0) continue; \n\n  // --- Date Parsing (Converting DD-MM-YYYY to YYYY-MM-DD for Date Object) ---\n  const parts = expiryDateStr.split('-');\n  \n  if (parts.length !== 3) {\n      console.warn(`Invalid date format for Product ID ${item.json['product_id']}: ${expiryDateStr}. Skipping.`);\n      continue;\n  }\n  \n  // Reconstruct date string as YYYY-MM-DD\n  const correctDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`; \n  \n  const expiryDate = new Date(correctDateStr);\n  expiryDate.setHours(0, 0, 0, 0);\n\n  // --- Core Logic Check ---\n  \n  // Check if the expiry date is within the next 60 days (including today)\n  if (expiryDate <= expiryDeadline && expiryDate >= today) {\n    \n    // Days remaining calculation\n    const diffTime = Math.abs(expiryDate - today);\n    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));\n    \n    // Set internal flags and remaining days\n    item.json['Is_Expiring_Soon'] = 'YES';\n    item.json['Expiry_Days_Left'] = diffDays;\n    \n    // Prepare the Professional Alert Message\n    item.json['ExpiryAlertMessage'] = `\n🚨 URGENT: Inventory Expiry Alert 🚨\n\nProduct Name : ${item.json['product_name']}\nProduct ID : ${item.json['product_id']}\nStock Level : ${stock} \nExpiry Date : ${expiryDateStr}\nDays Remaining : ${diffDays}\n\nAction Required: Immediate review by Sales or Disposal Team to minimize loss.\n`;\n    \n    itemsExpiringSoon.push(item);\n  }\n}\n\nreturn itemsExpiringSoon;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        240
+      ],
+      "id": "193a6748-8d3c-4b5b-8642-5b854f49d662",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "17e73bb5-b36a-4bbe-aa28-0683b5f9d838",
+              "leftValue": "={{ $json.expiry_alert_sent }}",
+              "rightValue": "=No",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        240
+      ],
+      "id": "a352523a-88e2-4d8d-a987-d801b5f02b5c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 564734544,
+          "mode": "list",
+          "cachedResultName": "Stock Received",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=564734544"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "invoice_no": "={{ $('If').item.json.invoice_no }}",
+            "expiry_alert_sent": "Yes"
+          },
+          "matchingColumns": [
+            "invoice_no"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "invoice_no",
+              "displayName": "invoice_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "qty_recieved",
+              "displayName": "qty_recieved",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "cost_price",
+              "displayName": "cost_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total_cost",
+              "displayName": "total_cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "expiry_date",
+              "displayName": "expiry_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "expairy_days_remaining",
+              "displayName": "expairy_days_remaining",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "expiry_alert_sent",
+              "displayName": "expiry_alert_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        240
+      ],
+      "id": "b9b17985-6d80-41b1-b1bc-ea6b49b3d012",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ Step 04: Expiry Stock Alert System\n- Source Data (The alert system checks the expiry dates mentioned in the Receive Stock Register.)\n- Threshold (An alert is triggered when an item's expiry date is 30 days or less away.)\n- An automated Email Notification (Company Owner) \n\n**Objective:**\nTo allow the company to take immediate action (e.g., clearance sale or disposal) before the stock becomes unusable.",
+        "height": 464,
+        "width": 1216
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -672,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "e09a94b4-faa6-4a40-8b84-79431092225a",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Stock Received": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send mail - Expairy Stock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send mail - Expairy Stock": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "JxKFwIEujWm88BmK",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "36351839-8318-44c1-8b13-74ea5e77758d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "JxKFwIEujWm88BmK",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

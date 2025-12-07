@@ -1,0 +1,329 @@
+{
+  "name": "7c_Automated Customer Feedback Loop",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1789827164,
+          "mode": "list",
+          "cachedResultName": "Customer Feedback",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1789827164"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -208
+      ],
+      "id": "d078bb94-7ea8-4453-abfb-e01eef9f912f",
+      "name": "Get Customer Feedback",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "aIG2EywHf9tpxrXY",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the feedback description from the sheet safely\nconst feedback = $json[\"Customer Feedback\"]?.trim();\n\n// List of negative keywords\nconst negativeKeywords = [\"bad\", \"problem\", \"disappointed\", \"issue\", \"not happy\"];\n\n// Check if feedback contains any negative keyword\nlet isNegative = false;\n\nif (feedback && typeof feedback === \"string\") {\n    const text = feedback.toLowerCase();\n    isNegative = negativeKeywords.some(keyword => text.includes(keyword));\n}\n\n// Return the item with extra fields for downstream nodes\n// Includes negative flag and rowIndex for Update Row node\nreturn [{\n    json: {\n        ...$json,               // Keep all original sheet fields\n        negative: isNegative,   // true if feedback is negative\n        rowIndex: $json.rowIndex // Pass row index for Update Row node\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "86916add-f13d-4a9d-99ab-88cf5fd67b40",
+      "name": "Feedback Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "=Thank You for Your Feedback,{{ $('Feedback Sentiment Analysis').item.json['Customer Name'] }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Feedback Received</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f4f6f9; padding:25px;\">\n\n  <div style=\"max-width:620px; margin:auto; background:#ffffff; padding:30px; border-radius:10px; border:1px solid #e2e8f0;\">\n\n    <!-- Header -->\n    <h2 style=\"text-align:center; color:#1e293b; margin-bottom:20px; letter-spacing:0.5px;\">\n      💬 We Have Received Your Feedback\n    </h2>\n\n    <!-- Greeting -->\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      Hi <strong>{{ $json[\"Customer Name\"] }}</strong>,\n    </p>\n\n    <!-- Message -->\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      Thank you for taking the time to share your feedback regarding  \n      <strong>{{ $json[\"Product Name\"] || \"your recent order\" }}</strong>.\n    </p>\n\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      We sincerely apologize for any inconvenience this may have caused.  \n      Please rest assured that your feedback has been forwarded to our support team,  \n      and they will reach out to you shortly to assist you and resolve the issue.\n    </p>\n\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      If you’d like to share additional details or attach supporting information,  \n      simply reply to this email — it will help us serve you better.\n    </p>\n\n    <!-- Divider -->\n    <hr style=\"border:0; border-top:1px solid #e5e7eb; margin:25px 0;\">\n\n    <!-- Footer -->\n    <p style=\"font-size:14px; color:#111; line-height:1.7;\">\n      Best regards,<br>\n      <strong>Nestle Distribution Multan</strong>\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        -208
+      ],
+      "id": "ff13ca06-fb85-473a-879e-fc5db6c7798f",
+      "name": "Send a message(Send Feedback)",
+      "webhookId": "876b6a59-ce8d-46b0-ab6f-e2c153a803e1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 296834783,
+          "mode": "list",
+          "cachedResultName": "Feedback Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=296834783"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Acknowledgment Sent": "={{ $json.labelIds[1] }}",
+            "Status": "={{ $json.labelIds[0] }}",
+            "Processed Time": "={{ $('Get Customer Feedback').item.json.Timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Acknowledgment Sent",
+              "displayName": "Acknowledgment Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Processed Time",
+              "displayName": "Processed Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "49e0919d-63f4-4b8a-ac30-0a684e28ad93",
+      "name": "Add Feedback Logs",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "=[Negative Feedback] {{ $('Get Customer Feedback').item.json['Customer Name'] }} - {{ $('Get Customer Feedback').item.json['  Feedback Category '] }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>New Negative Feedback Alert</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f4f6f9; padding:25px;\">\n\n  <div style=\"max-width:650px; margin:auto; background:#ffffff; padding:30px; border-radius:10px; border:1px solid #e2e8f0;\">\n\n    <!-- Header -->\n    <h2 style=\"text-align:center; color:#b91c1c; margin-bottom:20px; letter-spacing:0.5px;\">\n      ⚠️ New Negative Customer Feedback Received\n    </h2>\n\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      Hi Support Team,\n      <br><br>\n      A new <strong>negative customer feedback</strong> has been submitted. Please review the details below.\n    </p>\n\n    <!-- Feedback Details Table -->\n    <table style=\"width:100%; border-collapse: collapse; margin-top:15px;\">\n      <tr>\n        <td style=\"padding:10px; border:1px solid #e5e7eb; background:#f9fafb;\"><strong>Customer Name:</strong></td>\n        <td style=\"padding:10px; border:1px solid #e5e7eb;\">\n          {{ $('Get Customer Feedback').item.json['Customer Name'] }}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px; border:1px solid #e5e7eb; background:#f9fafb;\"><strong>Email:</strong></td>\n        <td style=\"padding:10px; border:1px solid #e5e7eb;\">\n          {{ $('Get Customer Feedback').item.json.Email }}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px; border:1px solid #e5e7eb; background:#f9fafb;\"><strong>Feedback Category:</strong></td>\n        <td style=\"padding:10px; border:1px solid #e5e7eb;\">\n          {{ $('Get Customer Feedback').item.json['  Feedback Category '] }}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px; border:1px solid #e5e7eb; background:#f9fafb;\"><strong>Feedback Description:</strong></td>\n        <td style=\"padding:10px; border:1px solid #e5e7eb;\">\n          {{ $('Get Customer Feedback').item.json['Feedback Message'] }}   </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px; border:1px solid #e5e7eb; background:#f9fafb;\"><strong>Date Submitted:</strong></td>\n        <td style=\"padding:10px; border:1px solid #e5e7eb;\">\n          {{ $json[\"Created Time\"] || $now }}\n        </td>\n      </tr>\n    </table>\n\n    <!-- Action Note -->\n    <p style=\"margin-top:20px; font-size:15px; color:#b91c1c; line-height:1.7;\">\n      <strong>Action Required:</strong> Please review the feedback and take the necessary steps to resolve the issue promptly.\n    </p>\n\n    <!-- Footer -->\n    <p style=\"font-size:14px; color:#111; margin-top:30px; line-height:1.7;\">\n      Thank you,<br>\n      <strong>Automated Feedback System</strong>\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -48
+      ],
+      "id": "a35c5652-eabc-434c-91c0-b3cbfc329f41",
+      "name": "Send a message (Support team))",
+      "webhookId": "05fc03ff-d1e1-4b5d-b701-4a578ed752e1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        0
+      ],
+      "id": "5294f5d7-5481-45a3-b233-6b932b22e50c",
+      "name": "Wait 1 minute",
+      "webhookId": "d05cb6b8-1f09-4cfe-96dc-aa38c1b19aa5"
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "=Update on your feedback: {{ $('Get Customer Feedback').item.json['  Feedback Category '] }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Feedback Resolution Update</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f4f6f9; padding:25px;\">\n\n  <div style=\"max-width:620px; margin:auto; background:#ffffff; padding:30px; border-radius:10px; border:1px solid #e2e8f0;\">\n\n    <!-- Header -->\n    <h2 style=\"text-align:center; color:#1e293b; margin-bottom:20px; letter-spacing:0.5px;\">\n      ✅ Your Feedback Has Been Resolved\n    </h2>\n\n    <!-- Message -->\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      Hi <strong>{{ $('Get Customer Feedback').item.json['Customer Name'] }}</strong>,\n      <br><br>\n      We’ve reviewed your feedback regarding \n      <strong>{{ $('Get Customer Feedback').item.json['  Feedback Category '] }}</strong> \n      and have taken the necessary actions to resolve the issue.\n    </p>\n\n    <p style=\"font-size:15px; color:#444; line-height:1.7; margin-top:10px;\">\n      Thank you for your patience and for helping us improve our service.  \n      If you have any further concerns or additional details to share, feel free to reply to this email anytime.\n    </p>\n\n    <!-- Footer -->\n    <p style=\"margin-top:30px; font-size:14px; color:#111; line-height:1.7;\">\n      Best regards,<br>\n      <strong>Nestle Water Distribution</strong>\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        512,
+        0
+      ],
+      "id": "1b3bae77-8bdb-4b5f-b2e2-62306c92125c",
+      "name": "Send a message to customer (update a feedback)",
+      "webhookId": "1422f484-d396-46e2-bc02-17c71b223a4e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🗣️ Step 17: Automated Customer Feedback Loop\n- Feedback Submission (e.g., Google Form, website form, or other digital channel)\n- Customer Confirmation (sent an automated Confirmation Email)\n- Support Team Queue or a relevant internal log sheet for action\n- Support Team Action & Reply\n- Support Response Content (e.g., \"We have received your feedback and are actively working to resolve the issue.\")\n\n**Objective:** \nTo ensure a swift and transparent communication loop, turning customer issues into opportunities for improved service.",
+        "height": 608,
+        "width": 976,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -448
+      ],
+      "typeVersion": 1,
+      "id": "c1fd2a80-4d01-49a4-be6f-ee1867df4507",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Customer Feedback": {
+      "main": [
+        [
+          {
+            "node": "Feedback Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Send a message(Send Feedback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message(Send Feedback)": {
+      "main": [
+        [
+          {
+            "node": "Add Feedback Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Feedback Logs": {
+      "main": [
+        [
+          {
+            "node": "Send a message (Support team))",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message (Support team))": {
+      "main": [
+        [
+          {
+            "node": "Wait 1 minute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 minute": {
+      "main": [
+        [
+          {
+            "node": "Send a message to customer (update a feedback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "O0ayuz07le8M25s4",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "7762f184-d475-400e-b773-e54302351732",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "O0ayuz07le8M25s4",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

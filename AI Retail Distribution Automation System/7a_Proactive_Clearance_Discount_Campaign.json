@@ -1,0 +1,478 @@
+{
+  "name": "7a_Proactive_Clearance_Discount_Campaign",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        -96
+      ],
+      "id": "85f4a9d7-0eb9-48a7-927f-564413717f84",
+      "name": "Monthly 1st Day 11:00 AM trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335712669,
+          "mode": "list",
+          "cachedResultName": "Stock Register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1335712669"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -976,
+        -96
+      ],
+      "id": "9eb37f9c-91df-4e37-8573-1d4748653a58",
+      "name": "Get Inventory Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1184,
+        176
+      ],
+      "id": "145ad060-965b-44ef-b3d5-b282a696712d",
+      "name": "Get Customer Detail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $items().map(item => {\n  const row = item.json;\n  const discount = Math.ceil(row.sale_price * 0.2); // 20% discount\n  return {\n    json: {\n      ...row,\n      discounted_price: row.sale_price - discount,\n      offer_message: `Special Offer! ${row.product_name} (${row.size}) is available at Rs ${row.sale_price - discount} instead of Rs ${row.sale_price}! Limited time only.`\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        -96
+      ],
+      "id": "ab2ff27a-54c1-4301-9c8f-0a2ccfdcd4c0",
+      "name": "20% Discount"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $items().map(item => {\n  const row = item.json;\n  return {\n    json: {\n      ...row,\n      purchase_stock: Number(row.purchase_stock) || 0,\n      sale_stock: Number(row.sale_stock) || 0,\n      current_stock: Number(row.current_stock) || 0,\n      cost_price: Number(row.cost_price) || 0,\n      sale_price: Number(row.sale_price) || 0,\n      total_purchase: Number(row.total_purchase) || 0,\n      total_sale: Number(row.total_sale) || 0,\n      reorder_level: Number(row.reorder_level) || 0\n    }\n  };\n});\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        -96
+      ],
+      "id": "b83da340-9c2a-4b93-b2f5-ccee57438f48",
+      "name": "Data Processing & Type Casting"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "13c95b03-d1e7-48dc-81ba-4f116bf13ca3",
+              "leftValue": "={{ $json.current_stock }}",
+              "rightValue": "={{ $json.reorder_level }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "a6da1770-94d9-4a5c-afdc-ed415514c505",
+              "leftValue": "={{ $json.sale_stock }}",
+              "rightValue": 100,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -528,
+        -96
+      ],
+      "id": "fb63e4d4-3585-4a12-874a-b7c181b3bc8f",
+      "name": "High Stock, Low Sales Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get customers from the correct node\nlet customers = $node[\"Get Customer Detail\"].json;\n\n// Ensure it's always an array\nif (!Array.isArray(customers)) {\n  customers = [customers];\n}\n\n// Get offers from the previous Code node\nconst offers = $items(\"20% Discount\"); // Node that generates discounted offers\n\n// Combine each offer with each customer\nreturn offers.flatMap(offer => {\n  return customers.map(customer => ({\n    json: {\n      name: customer.Name,           // Customer name from sheet\n      email: customer.Email,         // Customer email from sheet\n      product_name: offer.json.product_name,\n      size: offer.json.size,\n      original_price: offer.json.sale_price,\n      discounted_price: offer.json.discounted_price,\n      offer_message: offer.json.offer_message\n    }\n  }));\n});\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -912,
+        176
+      ],
+      "id": "bea08f78-f08e-4e65-9083-2e4cf0539e4a",
+      "name": "Prepare Individual Promotional Emails"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1847348902,
+          "mode": "list",
+          "cachedResultName": "Slow Moving Stock Campaign ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1847348902"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "\"Sent\"",
+            "Product Name": "={{ $('Prepare Individual Promotional Emails').item.json.product_name }}",
+            "Original_Price": "={{ $('Prepare Individual Promotional Emails').item.json.original_price }}",
+            "Discounted Price": "={{ $('Prepare Individual Promotional Emails').item.json.discounted_price }}",
+            "Offer Message": "={{ $('Prepare Individual Promotional Emails').item.json.offer_message }}",
+            "Customer Name": "={{ $('Get Customer Detail').item.json.customer_name }}",
+            "Customer Email": "={{ $('Get Customer Detail').item.json.email }}",
+            "Timestamp": "={{ $now }}",
+            "Product ID": "={{ $('Get Inventory Status').item.json.product_id }}",
+            "Size": "={{ $('Get Inventory Status').item.json.size }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Email",
+              "displayName": "Customer Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product ID",
+              "displayName": "Product ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product Name",
+              "displayName": "Product Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Size",
+              "displayName": "Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Original_Price",
+              "displayName": "Original_Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Discounted Price",
+              "displayName": "Discounted Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Offer Message",
+              "displayName": "Offer Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -384,
+        176
+      ],
+      "id": "e4228cb4-33e2-4be0-87b0-0da79f8ede25",
+      "name": "Add Slow Moving Stock Offer Campaign",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get Customer Detail').item.json.email }}",
+        "subject": "=Special Offer: {{$json.product_name}} for {{ $('Get Customer Detail').item.json.customer_name }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Special Offer</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f4f6f8; padding:25px;\">\n\n  <div style=\"max-width:600px; margin:auto; background:#ffffff; padding:30px; border-radius:10px; border:1px solid #e5e5e5;\">\n    \n    <!-- Header -->\n    <h2 style=\"text-align:center; color:#1e293b; margin-bottom:20px;\">\n      🎉 Special Offer Just for You\n    </h2>\n\n    <!-- Greeting -->\n    <p style=\"font-size:15px; color:#444; line-height:1.6;\">\n      Hello <strong>{{ $('Get Customer Detail').item.json.customer_name }}</strong>,\n      <br><br>\n      We’re excited to share an exclusive offer with you:\n    </p>\n\n    <!-- Offer Message -->\n    <div style=\"background:#f9fafb; border:1px solid #e5e7eb; padding:15px 18px; border-radius:6px; font-size:15px; color:#333; margin-top:10px; line-height:1.6;\">\n      {{ $json.offer_message }}\n    </div>\n\n    <!-- Limited Stock Note -->\n    <p style=\"color:#c0392b; font-size:15px; margin-top:20px;\">\n      <strong>Hurry! Limited stock available — order before it runs out.</strong>\n    </p>\n\n    <!-- Footer -->\n    <p style=\"font-size:15px; color:#444; line-height:1.6; margin-top:30px;\">\n      If you have any questions or want to place an order, feel free to contact us anytime.\n    </p>\n\n    <p style=\"margin-top:25px; font-size:14px; color:#111;\">\n      Best regards,<br>\n      <strong>Nestle Water Distribution</strong>\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        176
+      ],
+      "id": "1a746bd0-1667-442b-9d1b-a8611d7643b9",
+      "name": "Send a message to customer",
+      "webhookId": "a9f30d7c-9e11-47ba-8303-e9fa246a8a62",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🏷️ Step 15: Proactive Clearance Discount Campaign\n- Trigger Schedule (e.g., weekly or monthly)\n- Stock Register Analysis\n               1.  High Inventory: The Current Stock quantity is greater than the established Reorder Level (e.g., 500 units).\n               2. Low Demand: The sales quantity for that product is less than 100 pieces (e.g., in the last 30 days).\n- Offer Generation (special 20% discount offer)\n- Customer Data Retrieval (all active customers from the Customer Data Sheet)\n- Targeted Email Campaign (detailing the special limited-time 20% discount available on the specified slow-moving items)\n\n**Objective:** \nTo reduce excess inventory, free up warehouse space, and generate sales revenue from products that otherwise contribute to high carrying costs.",
+        "height": 768,
+        "width": 1200,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1280,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "b81a4bfb-e013-4e02-b2f4-f9fa1fbcec2a",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Monthly 1st Day 11:00 AM trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Inventory Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Inventory Status": {
+      "main": [
+        [
+          {
+            "node": "Data Processing & Type Casting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Detail": {
+      "main": [
+        [
+          {
+            "node": "Prepare Individual Promotional Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "20% Discount": {
+      "main": [
+        [
+          {
+            "node": "Get Customer Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Processing & Type Casting": {
+      "main": [
+        [
+          {
+            "node": "High Stock, Low Sales Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Stock, Low Sales Filter": {
+      "main": [
+        [
+          {
+            "node": "20% Discount",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Individual Promotional Emails": {
+      "main": [
+        [
+          {
+            "node": "Send a message to customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message to customer": {
+      "main": [
+        [
+          {
+            "node": "Add Slow Moving Stock Offer Campaign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "t4WboAAC4Aad7jIP",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "a655c0e5-fadc-43aa-ab9a-4195dbe62860",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "t4WboAAC4Aad7jIP",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

@@ -1,0 +1,728 @@
+{
+  "name": "6_Payment Register Reconciliation and Due Date Setting",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('Get Customer Orders Data').item.json.payment_method }}",
+              "rightValue": "Cash",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "671eb0b4-4601-42d4-b756-8a426e8f00ed",
+      "name": "Check Payment Method",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "order_id",
+              "value": "={{ $('Get Customer Orders Data').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "customer_name",
+              "value": "={{ $('Get Customer Orders Data').item.json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "amount_paid",
+              "value": "={{ $json['Amount Paid  '] }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "payment_status",
+              "value": "Paid",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "due_date",
+              "value": "=Cash Paid",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "balance",
+              "value": "={{ $('Get Customer Orders Data').item.json.total_price - $('Get Delivery Status Data').item.json['Amount Paid  '] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2d79f679-48e8-4bf9-98c9-a43006b2dfb8",
+      "name": "Prepare Payment Entry - Cash",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "order_id",
+              "value": "={{ $('Get Customer Orders Data').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "customer_name",
+              "value": "={{ $('Get Customer Orders Data').item.json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "balance",
+              "value": "={{ $('Get Customer Orders Data').item.json.total_price - $('Get Delivery Status Data').item.json['Amount Paid  '] }}",
+              "type": "number"
+            },
+            {
+              "id": "id-9",
+              "name": "payment_status",
+              "value": "Pending",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "due_date",
+              "value": "={{ $('Due Date -- 15 Days').item.json.due_date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4f41eb2a-1c50-4dca-aba7-221647d4719f",
+      "name": "Prepare Payment Entry - Credit",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1168522813,
+          "mode": "list",
+          "cachedResultName": "Payment",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1168522813"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "payment_status": "={{ $json.payment_status }}",
+            "balance": "={{ $json.balance }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "due_date": "={{ $json.due_date }}",
+            "customer_email": "={{ $('Get Customer Orders Data').item.json.email }}",
+            "amount_paid": "={{ $('Get Delivery Status Data').item.json['Amount Paid  '] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payment_status",
+              "displayName": "payment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount_paid",
+              "displayName": "amount_paid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "balance",
+              "displayName": "balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "fa903d1a-03a4-4986-ab1b-905d0801c806",
+      "name": "Add to Payment Register",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -16
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1120,
+        -16
+      ],
+      "id": "e11ccf23-5ba0-4705-abf4-c4ba33547fee",
+      "name": "Daily 11:00 PM trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -896,
+        -16
+      ],
+      "id": "f27ba32c-6416-4152-8dd6-9815066618c6",
+      "name": "Get Customer Orders Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1978963977,
+          "mode": "list",
+          "cachedResultName": "Delivery Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1978963977"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -672,
+        -16
+      ],
+      "id": "391771ba-f89a-4339-867e-362205ce9298",
+      "name": "Get Delivery Status Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Luxon Library is already available as 'DateTime' in n8n's Code Node\nfor (const item of items) {\n  const timestampString = item.json.Timestamp;\n  let orderDate;\n\n  // 1. Determine the base date (orderDate)\n  if (timestampString) {\n    // If Timestamp is present, try to parse it after cleaning\n    const cleanedTimestamp = timestampString.trim();\n    orderDate = DateTime.fromISO(cleanedTimestamp);\n  }\n\n  // 2. Fallback to current date if the orderDate is missing OR invalid\n  if (!orderDate || !orderDate.isValid) {\n    // If the Timestamp was missing or the date was invalid, use TODAY's date\n    orderDate = DateTime.now();\n  }\n\n  // 3. Calculate and format the due date (15 days added)\n  // We are sure 'orderDate' is now a valid date object (either from Timestamp or DateTime.now())\n  const due_date = orderDate.plus({ days: 15 }).toFormat('yyyy-MM-dd');\n\n  // Set the new property\n  item.json.due_date = due_date;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        -16
+      ],
+      "id": "2e22715f-5498-4d1b-b0b0-889cccf5f26b",
+      "name": "Due Date -- 15 Days"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "payment_method": "={{ $json.payment_status }}"
+          },
+          "matchingColumns": [
+            "order_id"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "quntity",
+              "displayName": "quntity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total_price",
+              "displayName": "total_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "landmark",
+              "displayName": "landmark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "payment_method",
+              "displayName": "payment_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_time_preference",
+              "displayName": "delivery_time_preference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "7da0a3f7-77f4-42c2-9f19-bb41f229c011",
+      "name": "Update Payment Method Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 💰 Step 11: Payment Register Reconciliation and Due Date Setting\n- Workflow Activation (Daily 11:00 PM)\n- Data Synchronization (The workflow links customer details from the Customer Orders Sheet with the final delivery status confirmed by the delivery man (from Step 07).)\n- Payment Register Update Logic (If Cash: The order status is set to \"Paid\" and the Balance Due is recorded as 0, and If Credit: The order status is set to \"Pending\", the full Balance Due amount is displayed, and a Due Date of 15 days from the date of update is added.)\n- Customer Orders Sheet Update (Payment Method -- Paid or Pending)\n\n**Objective:** \nThis finalizes the financial records, creating a clear record of receivables (pending payments) and establishing formal tracking for credit customers.",
+        "height": 576,
+        "width": 1904,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1248,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "8c2365b7-7813-4d45-8cf1-ddbfa1736504",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check Payment Method": {
+      "main": [
+        [
+          {
+            "node": "Prepare Payment Entry - Cash",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Payment Entry - Credit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Payment Entry - Cash": {
+      "main": [
+        [
+          {
+            "node": "Add to Payment Register",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Payment Entry - Credit": {
+      "main": [
+        [
+          {
+            "node": "Add to Payment Register",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Payment Register": {
+      "main": [
+        [
+          {
+            "node": "Update Payment Method Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 11:00 PM trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Customer Orders Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Orders Data": {
+      "main": [
+        [
+          {
+            "node": "Get Delivery Status Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Delivery Status Data": {
+      "main": [
+        [
+          {
+            "node": "Due Date -- 15 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Due Date -- 15 Days": {
+      "main": [
+        [
+          {
+            "node": "Check Payment Method",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "OKou36wkZnOT720G",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "7931f2ac-3c73-4fda-8686-ab30a483a443",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "OKou36wkZnOT720G",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

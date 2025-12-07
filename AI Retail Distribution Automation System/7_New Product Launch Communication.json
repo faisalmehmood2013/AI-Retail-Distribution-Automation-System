@@ -1,0 +1,332 @@
+{
+  "name": "7_New Product Launch Communication",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Get product data\nconst rawProduct = $node[\"New Product Data\"].json;\n\n// Normalize keys by trimming spaces from Google Sheets columns\nlet product = {};\nfor (const key in rawProduct) {\n  product[key.trim()] = rawProduct[key];\n}\n\n// Load customers\nlet customers = $node[\"Customer Detail\"].json || [];\nif (!Array.isArray(customers)) customers = [customers];\n\n// Map final output\nreturn customers.map(customer => ({\n  json: {\n    name: customer[\"Customer Name\"] || \"there\",\n    email: customer[\"Email\"] || \"shahfaisal1234@gmail.com\",\n\n    // Now using trimmed keys\n    productName: product[\"Product Name\"] || \"New Product\",\n    category: product[\"Category\"] || \"General\",\n    price: product[\"Price\"] || \"0\",\n    shortDescription: product[\"Product Description\"] || \"No description\"\n  }\n}));\n\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -272
+      ],
+      "id": "c442c733-f9a4-48f1-8127-c30de3837fc6",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 Step 14: New Product Launch Communication\n- Product Detail Update (company launches a new product)\n- Customer Data Retrieval (retrieves the contact details (name and email address) of all existing customers from the Customer Orders Sheet)\n- Customer Email Campaign\n\n**Objective:** \nTo leverage the existing customer base for new sales immediately after a product launch, and to ensure marketing efforts are tracked.",
+        "height": 512,
+        "width": 1200,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        -624
+      ],
+      "typeVersion": 1,
+      "id": "ca9f7243-e752-4513-9606-6975bf91a9c7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1202744028,
+          "mode": "list",
+          "cachedResultName": "New Product Campaign",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1202744028"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -272
+      ],
+      "id": "0263bd8c-1046-46df-9b20-bd54e5e461df",
+      "name": "New Product Data",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "aIG2EywHf9tpxrXY",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        -272
+      ],
+      "id": "19f2ab76-3365-44e2-9dfa-604057a09db7",
+      "name": "Customer Detail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{`New Product Alert: ${$json[\"productName\"]} for ${$json[\"name\"]}`}}\n",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>New Product Launch</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f4f6f8; padding:25px;\">\n\n  <div style=\"max-width:600px; margin:auto; background:#ffffff; padding:30px; border-radius:10px; border:1px solid #e5e5e5;\">\n\n    <!-- Header -->\n    <h2 style=\"text-align:center; color:#1e293b; margin-bottom:15px;\">\n      🌟 New Product Launch Announcement\n    </h2>\n\n    <p style=\"font-size:15px; color:#444; line-height:1.6;\">\n      Hello <strong>{{ $('Customer Detail').item.json.customer_name }}</strong>,  \n      <br><br>\n      We're excited to introduce our latest product, specially curated to enhance your experience.\n    </p>\n\n    <!-- Product Details Table -->\n    <table style=\"border-collapse: collapse; width: 100%; margin-top:15px; font-size:15px;\">\n      <tr>\n        <td style=\"padding:10px; border:1px solid #ddd; background:#f9fafb;\"><strong>Product ID</strong></td>\n        <td style=\"padding:10px; border:1px solid #ddd;\">{{ $('New Product Data').item.json['Product ID'] }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:10px; border:1px solid #ddd; background:#f9fafb;\"><strong>Product Name</strong></td>\n        <td style=\"padding:10px; border:1px solid #ddd;\">{{ $json[\"productName\"] }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:10px; border:1px solid #ddd; background:#f9fafb;\"><strong>Category</strong></td>\n        <td style=\"padding:10px; border:1px solid #ddd;\">{{ $json[\"category\"] }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:10px; border:1px solid #ddd; background:#f9fafb;\"><strong>Price</strong></td>\n        <td style=\"padding:10px; border:1px solid #ddd;\">Rs {{ $json[\"price\"] }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:10px; border:1px solid #ddd; background:#f9fafb;\"><strong>Description</strong></td>\n        <td style=\"padding:10px; border:1px solid #ddd;\">{{ $json[\"shortDescription\"] }}</td>\n      </tr>\n    </table>\n\n    <!-- Promo Message -->\n    <p style=\"color:#c0392b; margin-top:20px; font-size:15px;\">\n      <strong>Hurry! Limited stock available — place your order now to avoid missing out.</strong>\n    </p>\n\n    <!-- Footer -->\n    <p style=\"margin-top:30px; font-size:15px; color:#444; line-height:1.6;\">\n      If you have any questions or wish to place an order, feel free to contact us anytime.\n    </p>\n\n    <p style=\"margin-top:25px; font-size:14px; color:#111;\">\n      Best regards,<br>\n      <strong>Nestle Water Distribution</strong>\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        -272
+      ],
+      "id": "ef83d04d-f25c-47ab-a73c-ffeed79da54d",
+      "name": "Send a message to customer",
+      "webhookId": "a5274827-1777-4b52-be66-e6ae30118ca8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1083091498,
+          "mode": "list",
+          "cachedResultName": "Campaign Logs New Product",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1083091498"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$now}}",
+            "Customer Name": "={{ $('Customer Detail').item.json.customer_name }}",
+            "Customer Email": "={{ $('Code in JavaScript1').item.json.email }}",
+            "Product Name": "={{ $('Code in JavaScript1').item.json.productName }}",
+            "Category": "={{ $('Code in JavaScript1').item.json.category }}",
+            "Description": "={{ $('Code in JavaScript1').item.json.shortDescription }}",
+            "Status": "Sent",
+            "Product ID": "={{ $('New Product Data').item.json['Product ID'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Email",
+              "displayName": "Customer Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product ID",
+              "displayName": "Product ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product Name",
+              "displayName": "Product Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        944,
+        -272
+      ],
+      "id": "d3e16bee-5bf2-4ece-9cae-4a68751a6040",
+      "name": "Add Campaign Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message to customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Product Data": {
+      "main": [
+        [
+          {
+            "node": "Customer Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Detail": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message to customer": {
+      "main": [
+        [
+          {
+            "node": "Add Campaign Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "hQTb6nIHECQ7f2lj",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "0d6fce29-a02a-4a11-bb5c-ce3f6da11277",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "hQTb6nIHECQ7f2lj",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

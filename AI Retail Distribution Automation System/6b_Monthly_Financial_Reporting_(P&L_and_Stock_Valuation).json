@@ -1,0 +1,753 @@
+{
+  "name": "6b_Monthly_Financial_Reporting_(P&L_and_Stock_Valuation)",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Delivered"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a25dd6c6-4812-4599-8777-a56d81c32e3a",
+      "name": "Get Sales Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2352,
+        -224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 354412029,
+          "mode": "list",
+          "cachedResultName": "Expense Record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=354412029"
+        },
+        "options": {}
+      },
+      "id": "805b478d-41cc-4204-b505-12a2373f99e4",
+      "name": "Get Expense Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2352,
+        -32
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "80ad92d7-69f1-4bb4-bb4c-b9c887a47767",
+      "name": "Merge Financial Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1680,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: P&L Calculation (Final Report)\nlet Revenue = 0;\nlet COGS = 0;\nlet Expenses = 0;\nlet InventoryValue = 0;\n\n// Merge node se aane wale saare items (Revenue, COGS, Expenses, Inventory Value) ko extract karein\nfor (const item of items) {\n    const metric = item.json.metric;\n    const amount = item.json.amount;\n\n    if (metric === 'Total Revenue') {\n        Revenue = amount;\n    } else if (metric === 'Total COGS') {\n        COGS = amount;\n    } else if (metric === 'Total Operating Expenses') {\n        Expenses = amount;\n    } else if (metric === 'Total Inventory Value') {\n        InventoryValue = amount;\n    }\n}\n\nconst grossProfit = Revenue - COGS;\nconst netProfit = grossProfit - Expenses;\n\n// Final P&L report\nreturn [{\n    json: {\n        // --- Profit & Loss Metrics ---\n        'Total Revenue': Revenue.toFixed(2),\n        'Total COGS': COGS.toFixed(2),\n        'Gross Profit': grossProfit.toFixed(2),\n        'Total Operating Expenses': Expenses.toFixed(2),\n        'Net Profit/Loss': netProfit.toFixed(2),\n        \n        // --- Valuation Metric ---\n        'Current Stock Total Value': InventoryValue.toFixed(2)\n    }\n}];"
+      },
+      "id": "b3e15e2c-1e75-4342-a1f7-77bc99c37f65",
+      "name": "Calculate P&L",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1456,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "Monthly Profit & Loss Statement",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Financial Performance Report</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f4f6f8; padding:25px;\">\n\n  <div style=\"max-width:650px; margin:auto; background:#ffffff; padding:30px; border-radius:10px; border:1px solid #e5e5e5;\">\n\n    <!-- Heading -->\n    <h2 style=\"text-align:center; color:#1e293b; margin-bottom:25px;\">\n      📊 Financial Performance Report\n    </h2>\n\n    <p style=\"font-size:15px; color:#444; line-height:1.6;\">\n      Please find the updated Profit & Loss summary along with current stock value.\n      Review the figures below for financial evaluation and planning.\n    </p>\n\n    <!-- Financial Summary Table -->\n    <table style=\"width:100%; border-collapse:collapse; margin-top:20px; font-size:15px;\">\n      <tr>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd;\"><strong>Total Revenue</strong></td>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd; text-align:right;\">PKR {{ $json['Total Revenue'] }} </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd;\"><strong>Total COGS</strong></td>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd; text-align:right;\">PKR {{ $json['Total COGS'] }}</td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd;\"><strong>Gross Profit</strong></td>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd; text-align:right;\">PKR {{ $json['Gross Profit'] }}</td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd;\"><strong>Total Operating Expenses</strong></td>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd; text-align:right;\">PKR {{ $json['Total Operating Expenses'] }} </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd;\"><strong>Net Profit / Loss</strong></td>\n        <td style=\"padding:12px; border-bottom:1px solid #ddd; text-align:right; font-weight:bold;\">\n          PKR {{ $json['Net Profit/Loss'] }}\n        </td>\n      </tr>\n\n      <tr style=\"background:#f8fafc;\">\n        <td style=\"padding:12px; border:1px solid #ddd;\"><strong>Current Stock Total Value</strong></td>\n        <td style=\"padding:12px; border:1px solid #ddd; text-align:right; font-weight:bold;\">\n          PKR {{ $json['Current Stock Total Value'] }}\n        </td>\n      </tr>\n    </table>\n\n    <p style=\"margin-top:30px; color:#555; font-size:14px; line-height:1.6;\">\n      For detailed breakdowns or historical comparison, please contact the finance team.\n    </p>\n\n    <p style=\"text-align:center; margin-top:35px; color:#94a3b8; font-size:13px;\">\n      — Automated Financial Report —\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "id": "6913d5f3-dfff-45a5-ad14-ad465b2cfd5c",
+      "name": "Send P&L via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1232,
+        64
+      ],
+      "webhookId": "dfc6c0b8-65f2-4820-8265-ad6bfb2dd107",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 564734544,
+          "mode": "list",
+          "cachedResultName": "Stock Received",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=564734544"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2352,
+        160
+      ],
+      "id": "1038bbc6-678a-421e-8a00-3a351ecfb3b4",
+      "name": "Get Purchase Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2800,
+        160
+      ],
+      "id": "1db97010-1835-4c0a-b819-e7f8d3552885",
+      "name": "Monthly 1st Day 11:00 AM trigger"
+    },
+    {
+      "parameters": {
+        "content": "## 📈 Step 13: Monthly Financial Reporting (P&L and Stock Valuation)\n- Trigger Schedule (1st day of every month)\n- Data Aggregation (Sales Revenue, Total Purchases/Cost of Goods Sold (COGS), Expenses)\n- P&L Calculation\n- Current Stock Valuation\n- P&L Register Update\n\n**Financial Reporting:** \nA detailed report of the last month's P&L and the Current Stock Valuation is automatically compiled and emailed to the Owner and the Finance Team.\n",
+        "height": 976,
+        "width": 2112,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2912,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "3a1e245f-5d0e-4d3e-9975-8beb60d99fa2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335712669,
+          "mode": "list",
+          "cachedResultName": "Stock Register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1335712669"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2128,
+        352
+      ],
+      "id": "e87838f4-6f98-47f2-88c7-c62ffc1a0081",
+      "name": "Get Current Inventory",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Time Period Calculator (Fixing Filter Dates)\nconst today = new Date();\nconst currentMonth = today.getMonth();\n\n// 1. Start Date (Pichle Mahine ki 1st tarikh, 00:00:00.000)\nconst startDate = new Date(today.getFullYear(), currentMonth - 1, 1);\nstartDate.setHours(0, 0, 0, 0); // Din ki shuruaat\n\n// 2. End Date (Pichle Mahine ki aakhri tarikh, 23:59:59.999)\nconst endDate = new Date(today.getFullYear(), currentMonth, 0); \nendDate.setHours(23, 59, 59, 999); // Din ka aakhri second\n\n// Full ISO format (Time Zone ke saath) generate karein\n// Yeh format aapke sales data ke saath sahih tareeqe se compare hoga\nconst startFilter = startDate.toISOString();\nconst endFilter = endDate.toISOString();\n\nreturn [{\n    json: {\n        'filter_start_date': startFilter,\n        'filter_end_date': endFilter\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2576,
+        -32
+      ],
+      "id": "c95d7808-3576-4c7f-a5ea-f92311cd27a7",
+      "name": "Time Period Calculator Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Inventory Valuation\nlet totalInventoryValue = 0;\n\nfor (const item of items) {\n    const stock = Number(item.json['current_stock']) || 0;\n    const costPrice = Number(item.json['cost_price']) || 0; \n    \n    // Har product ki current stock value calculate karein\n    const productValue = stock * costPrice;\n    totalInventoryValue += productValue;\n}\n\n// Output mein Total Inventory Value bhejein\nreturn [{\n    json: {\n        metric: 'Total Inventory Value',\n        amount: totalInventoryValue\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1904,
+        352
+      ],
+      "id": "db61e358-6ff9-4467-851a-0ba03d0cd602",
+      "name": "Inventory Valuation"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Aggregate Revenue\nlet totalRevenue = 0;\n\nfor (const item of items) {\n    // Apni Sale Register sheet ke field name ke mutabiq badlein\n    const saleAmount = Number(item.json['total_price']) || 0; \n    totalRevenue += saleAmount;\n}\n\n// Output mein sirf Total Revenue bhejein\nreturn [{\n    json: {\n        metric: 'Total Revenue',\n        amount: totalRevenue\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1904,
+        -224
+      ],
+      "id": "28dfadcf-4b79-4fce-ad99-20008baab028",
+      "name": "Aggregate Revenue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Aggregate Operating Expenses\nlet totalExpenses = 0;\n\nfor (const item of items) {\n    // Apni Expense sheet ke field name ke mutabiq badlein\n    const expenseAmount = Number(item.json['Amount']) || 0; \n    totalExpenses += expenseAmount;\n}\n\n// Output mein sirf Total Expenses bhejein\nreturn [{\n    json: {\n        metric: 'Total Operating Expenses',\n        amount: totalExpenses\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1904,
+        -32
+      ],
+      "id": "73fbbb0f-1275-4296-aafd-20e91a743839",
+      "name": "Aggregate Expenses"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Aggregate Cost of Goods Sold (COGS)\nlet totalCOGS = 0;\n\nfor (const item of items) {\n    // Apni Purchase Register sheet ke field name ke mutabiq badlein\n    const costAmount = Number(item.json['total_cost']) || 0; \n    totalCOGS += costAmount;\n}\n\n// Output mein sirf Total COGS bhejein\nreturn [{\n    json: {\n        metric: 'Total COGS',\n        amount: totalCOGS\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1904,
+        160
+      ],
+      "id": "58c77117-0059-41d2-9650-61805bfb3538",
+      "name": "Aggregate COGS"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2124748143,
+          "mode": "list",
+          "cachedResultName": "P/L",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2124748143"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Total Revenue": "={{ $('Calculate P&L').item.json['Total Revenue'] }}",
+            "Total CGOS": "={{ $('Calculate P&L').item.json['Total COGS'] }}",
+            "Gross Profit": "={{ $('Calculate P&L').item.json['Gross Profit'] }}",
+            "Total Expense": "={{ $('Calculate P&L').item.json['Total Operating Expenses'] }}",
+            "Net Profit / Loss": "={{ $('Calculate P&L').item.json['Net Profit/Loss'] }}",
+            "Current Stock otal Value": "={{ $('Calculate P&L').item.json['Current Stock Total Value'] }}",
+            "Date": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Revenue",
+              "displayName": "Total Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total CGOS",
+              "displayName": "Total CGOS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Gross Profit",
+              "displayName": "Gross Profit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Expense",
+              "displayName": "Total Expense",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Net Profit / Loss",
+              "displayName": "Net Profit / Loss",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Current Stock otal Value",
+              "displayName": "Current Stock otal Value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1008,
+        64
+      ],
+      "id": "c66482e0-ebf7-4d9b-a9e4-f2f0a06ccd9f",
+      "name": "Add P/L Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c866ad2e-1784-4dc5-aee2-75f2e2c6af4e",
+              "leftValue": "={{ $json.timestamp }}",
+              "rightValue": "={{ $('Time Period Calculator Code').item.json.filter_start_date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "a3c6cbe4-e655-46ef-887c-b538692efe0a",
+              "leftValue": "={{ $json.timestamp }}",
+              "rightValue": "={{ $('Time Period Calculator Code').item.json.filter_end_date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "beforeOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -2128,
+        -224
+      ],
+      "id": "dcfba0fa-e7c5-49a4-8ba9-4867eaf8bf36",
+      "name": "Filter Last Month Sales"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c866ad2e-1784-4dc5-aee2-75f2e2c6af4e",
+              "leftValue": "={{ $json.Timestamp }}",
+              "rightValue": "={{ $('Time Period Calculator Code').item.json.filter_start_date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "a3c6cbe4-e655-46ef-887c-b538692efe0a",
+              "leftValue": "={{ $json.Timestamp }}",
+              "rightValue": "={{ $('Time Period Calculator Code').item.json.filter_end_date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "beforeOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -2128,
+        -32
+      ],
+      "id": "a64c4d12-e921-4b14-894b-989e56c831e6",
+      "name": "Filter Last Month Expense"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c866ad2e-1784-4dc5-aee2-75f2e2c6af4e",
+              "leftValue": "={{ $json.timestamp }}",
+              "rightValue": "={{ $('Time Period Calculator Code').item.json.filter_start_date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "a3c6cbe4-e655-46ef-887c-b538692efe0a",
+              "leftValue": "={{ $json.timestamp }}",
+              "rightValue": "={{ $('Time Period Calculator Code').item.json.filter_end_date }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "beforeOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -2128,
+        160
+      ],
+      "id": "b2f4035f-a0c8-42d4-aa27-b13954e3a548",
+      "name": "Filter Last Month Purchase"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Sales Data": {
+      "main": [
+        [
+          {
+            "node": "Filter Last Month Sales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Expense Data": {
+      "main": [
+        [
+          {
+            "node": "Filter Last Month Expense",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Financial Data": {
+      "main": [
+        [
+          {
+            "node": "Calculate P&L",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate P&L": {
+      "main": [
+        [
+          {
+            "node": "Send P&L via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Purchase Data": {
+      "main": [
+        [
+          {
+            "node": "Filter Last Month Purchase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monthly 1st Day 11:00 AM trigger": {
+      "main": [
+        [
+          {
+            "node": "Time Period Calculator Code",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Current Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send P&L via Gmail": {
+      "main": [
+        [
+          {
+            "node": "Add P/L Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Inventory": {
+      "main": [
+        [
+          {
+            "node": "Inventory Valuation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Time Period Calculator Code": {
+      "main": [
+        [
+          {
+            "node": "Get Expense Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Sales Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Purchase Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inventory Valuation": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Aggregate Revenue": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Expenses": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Aggregate COGS": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Filter Last Month Sales": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Revenue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Last Month Expense": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Expenses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Last Month Purchase": {
+      "main": [
+        [
+          {
+            "node": "Aggregate COGS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "6Pg88WoYPtcymwRQ",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "6bc7e1bc-e48b-419d-9696-e7b1e378d4c4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "6Pg88WoYPtcymwRQ",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

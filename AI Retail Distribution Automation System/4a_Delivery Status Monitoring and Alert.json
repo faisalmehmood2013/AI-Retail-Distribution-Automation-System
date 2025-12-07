@@ -1,0 +1,382 @@
+{
+  "name": "4a_Delivery Status Monitoring and Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $json.customer_email }}",
+        "subject": "=⚠️ ORDER Alert:  {{ $json.order_id }}",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Order Alert</title>\n<style>\n  body {\n    font-family: Arial, Helvetica, sans-serif;\n    background-color: #f7f7f7;\n    margin: 0;\n    padding: 0;\n  }\n  .container {\n    max-width: 600px;\n    margin: 20px auto;\n    background: #ffffff;\n    border-radius: 8px;\n    padding: 25px;\n    box-shadow: 0 4px 15px rgba(0,0,0,0.08);\n    border-left: 6px solid #e11d48;\n  }\n  h2 {\n    color: #e11d48;\n    margin-top: 0;\n    font-size: 20px;\n  }\n  p {\n    font-size: 15px;\n    color: #333;\n    line-height: 1.6;\n    margin: 8px 0;\n    white-space: pre-line; /* JAROORI! Line breaks preserve honge */\n  }\n  .footer {\n    margin-top: 25px;\n    font-size: 12px;\n    color: #777;\n    text-align: center;\n  }\n</style>\n</head>\n<body>\n\n<div class=\"container\">\n\n  <h2>⚠️Order Alert Notification ⚠️</h2>\n\n  <p>\n    {{ $json.AlertMessage }}\n  </p>\n\n  <p class=\"footer\">This is an automated alert. No reply is required.</p>\n\n</div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f23489d4-1021-4a9f-b141-bb13d2f012a1",
+      "name": "Send a message",
+      "webhookId": "a38e70dc-bf12-4691-a3b5-ab0cf8ebe890",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        0
+      ],
+      "id": "0b1116ae-ac92-4a75-ba0d-9ab8eb557202",
+      "name": "Daily 06 PM Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596419502,
+          "mode": "list",
+          "cachedResultName": "Dispatch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1596419502"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        0
+      ],
+      "id": "c65f4b99-3796-4c13-b816-1cc21deaa78a",
+      "name": "Dispatch Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f33a1c2c-7b45-4ffa-a2ad-da14d0ca4d54",
+              "leftValue": "={{ $json.current_status }}",
+              "rightValue": "Delivered",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "9b2ee716-00f6-4e9a-b7c0-ce06af937f35",
+              "leftValue": "={{ $json.alert_sent }}",
+              "rightValue": "NO",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "5eac6d1d-81f5-4dfa-8bcd-57feaf172a33",
+      "name": "Not Delivered"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst itemsWithAlert = [];\n\n// Aaj ki tareekh ko sirf date ke liye set karein (waqt hata dein)\nnow.setHours(0, 0, 0, 0);\n\nfor (const item of items) {\n    const expectedDateStr = item.json['delivery_deadline'];\n    if (!expectedDateStr) continue;\n\n    // 1. DD-MM-YYYY format ko YYYY-MM-DD mein badalna\n    // '25-11-2025' -> ['25', '11', '2025'] -> ['2025', '11', '25'] -> '2025-11-25'\n    const parts = expectedDateStr.split('-');\n    // Yaqeen karein ke string mein teen parts hain (DD, MM, YYYY)\n    if (parts.length !== 3) {\n        console.warn(`Skipping item due to invalid date format: ${expectedDateStr}`);\n        continue;\n    }\n    \n    // YYYY-MM-DD format banayen\n    const correctDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`; \n    \n    const expectedDate = new Date(correctDateStr);\n    \n    // Date comparison ke liye expected date ko bhi sirf date ke liye set karein\n    expectedDate.setHours(0, 0, 0, 0);\n\n    // Date check (Agar expected date, aaj ki date se pehle ki hai)\n    if (expectedDate < now) {\n        // Late Delivery Alert Condition Met\n        item.json['AlertMessage'] = `\\n⚠️ LATE ORDER: ${item.json['order_id']} ⚠️\\nCustomer: ${item.json['customer_name']}\\nSalesman: ${item.json['delivery_person']}\\nExpected Date: ${expectedDateStr}\\nStatus: ${item.json['current_status']}\\n\\nAction Required!\\n`;\n        itemsWithAlert.push(item);\n    }\n}\n\nreturn itemsWithAlert; // Only returns late items"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fcaa526b-9256-4b43-9eaf-fb06405559d2",
+      "name": "Alert Message"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596419502,
+          "mode": "list",
+          "cachedResultName": "Dispatch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1596419502"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $('Alert Message').item.json.order_id }}",
+            "alert_sent": "YES"
+          },
+          "matchingColumns": [
+            "order_id"
+          ],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dispatch_date",
+              "displayName": "dispatch_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_person",
+              "displayName": "delivery_person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_contact",
+              "displayName": "delivery_contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_phone",
+              "displayName": "customer_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_deadline",
+              "displayName": "delivery_deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "current_status",
+              "displayName": "current_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alert_sent",
+              "displayName": "alert_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "62e1e787-9807-4f43-9242-9ac9994378e0",
+      "name": "Update Dispate Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ⏰ Step 06: Delivery Status Monitoring aur Alert\n- Workflow Activation (Daily 06:00 PM)\n- Data Review (dispatch Sheet (from Step 05) to check the current delivery status of all items dispatched that day.)\n- Owner Alert (Email the pending deliveries.)\n- Dispatch Sheet Update (Owner Alert Sent -- Yes)\n\n**Objective:**\nThis step provides timely oversight on delivery performance and creates an audit trail for escalated issues.",
+        "height": 448,
+        "width": 1376,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -704,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "e5d2e7d0-d403-440e-992d-3cc037f8e7a3",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update Dispate Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 06 PM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Dispatch Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dispatch Orders": {
+      "main": [
+        [
+          {
+            "node": "Not Delivered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Delivered": {
+      "main": [
+        [
+          {
+            "node": "Alert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Message": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "FSBdbDbknijEyUp6",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "b752d49b-054f-417e-b68f-26bb6f5fa58f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "FSBdbDbknijEyUp6",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

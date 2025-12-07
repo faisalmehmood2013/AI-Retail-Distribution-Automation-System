@@ -1,0 +1,333 @@
+{
+  "name": "5a_Automated_Reorder_and_Purchase_Order_Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335712669,
+          "mode": "list",
+          "cachedResultName": "Stock Register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1335712669"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -640,
+        -192
+      ],
+      "id": "e24e95d9-9c93-4604-9d53-37661bea4af5",
+      "name": "Get Stock Register",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Reorder Logic\nconst itemsToReorder = [];\n\nfor (const item of items) {\n  const currentStock = item.json['current_stock'] || 0;\n  const reorderLevel = item.json['reorder_level'] || 0;\n  const last30DaysSale = item.json['last_30_days_sale'] || 0; // Customer Orders se aaya hua data\n  \n  item.json['need_to_reorder'] = 'No'; \n  \n  if (currentStock <= reorderLevel) {\n    item.json['need_to_reorder'] = 'Yes';\n    \n    // Low Stock Quantity Calculation: Minimum 2 mahine ki demand (60 din) order karein\n    const dailyDemand = last30DaysSale / 30;\n    const qtyNeededFor60Days = dailyDemand * 60; \n    \n    // Agar calculated quantity > 0 ho, warna reorder level jitna order karein\n    const suggestedOrderQuantity = Math.ceil(qtyNeededFor60Days);\n    \n    item.json['qty_order'] = suggestedOrderQuantity > reorderLevel ? suggestedOrderQuantity : reorderLevel;\n    \n    itemsToReorder.push(item);\n  }\n}\n\nreturn itemsToReorder;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        -192
+      ],
+      "id": "70d232d2-bc5e-4d82-b97f-e8f23e237335",
+      "name": "Reorder Logic"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1f0ec000-7d58-44a1-a52c-d298fef70890",
+              "leftValue": "={{ $json.need_to_reorder }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        -192
+      ],
+      "id": "8b809680-4044-42c7-ad48-33afa9998232",
+      "name": "IF Node (Reorder Check)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1585012146,
+          "mode": "list",
+          "cachedResultName": "Purchase Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1585012146"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "product_id": "={{ $('Reorder Logic').item.json.product_id }}",
+            "product_name": "={{ $('Reorder Logic').item.json.product_name }}",
+            "size": "={{ $('Reorder Logic').item.json.size }}",
+            "category": "={{ $('Reorder Logic').item.json.category }}",
+            "qty_order": "={{ $('Reorder Logic').item.json.qty_order }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qty_order",
+              "displayName": "qty_order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        -192
+      ],
+      "id": "519ed7fb-e06d-4abe-8ee3-2839470f3d95",
+      "name": "Create PO Draft",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "Low Stock Alert – Immediate Replenishment Required",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\" />\n<title>Low Stock Alert</title>\n<style>\n    body {\n        font-family: Arial, Helvetica, sans-serif;\n        background: #f4f4f4;\n        margin: 0;\n        padding: 0;\n    }\n    .container {\n        max-width: 650px;\n        margin: 30px auto;\n        background: #ffffff;\n        padding: 25px;\n        border-radius: 10px;\n        border: 1px solid #e3e3e3;\n    }\n    .header {\n        background: #d9534f;\n        padding: 18px;\n        border-radius: 8px;\n        text-align: center;\n        font-size: 22px;\n        font-weight: bold;\n        color: #fff;\n    }\n    .content {\n        margin-top: 20px;\n        font-size: 15px;\n        color: #333;\n        line-height: 1.6;\n    }\n    table {\n        width: 100%;\n        border-collapse: collapse;\n        margin-top: 18px;\n    }\n    th {\n        background: #f2f2f2;\n        padding: 10px;\n        border: 1px solid #ddd;\n        font-size: 14px;\n        text-align: left;\n    }\n    td {\n        padding: 10px;\n        border: 1px solid #ddd;\n        font-size: 14px;\n    }\n    .footer {\n        margin-top: 25px;\n        font-size: 14px;\n        color: #666;\n        border-top: 1px solid #ddd;\n        padding-top: 15px;\n    }\n</style>\n</head>\n\n<body>\n<div class=\"container\">\n\n    <!-- HEADLINE -->\n    <div class=\"header\">\n        Low Stock Alert – Immediate Action Required\n    </div>\n\n    <!-- MESSAGE BODY -->\n    <div class=\"content\">\n        The following product has reached a low stock level and requires urgent replenishment:\n    </div>\n\n    <!-- PRODUCT TABLE -->\n    <table>\n        <tr>\n            <th>Product ID</th>\n            <th>Product Name</th>\n            <th>Size</th>\n            <th>Category</th>\n            <th>Quantity Ordered</th>\n        </tr>\n        <tr>\n            <td>{{ $json.product_id }}</td>\n            <td>{{ $json.product_name }}</td>\n            <td>{{ $json.size }}</td>\n            <td>{{ $json.category }}</td>\n            <td>{{ $json.qty_order }}</td>\n        </tr>\n    </table>\n\n    <div class=\"content\">\n        Please proceed with the required purchase to avoid stock-out situations.\n    </div>\n\n    <!-- FOOTER -->\n    <div class=\"footer\">\n        Regards,<br>\n        <strong>Nestle Water Distribution Multan</strong>\n    </div>\n\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        -192
+      ],
+      "id": "c570beb2-2089-4f27-be68-7715fed6905a",
+      "name": "Send Low Stock Alert",
+      "webhookId": "7ffb85fd-8f19-45a8-b862-49909dc423b1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 22
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -864,
+        -192
+      ],
+      "id": "d3ab5876-6295-41d9-b1c7-1b26ef81e577",
+      "name": "Daily 10:00 AM Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## 🛒 Step 09: Automated Reorder and Purchase Order Generation\n- Reorder Level Check \n- Daily 10:00 AM Trigger Condition (A reorder is triggered if the Current Stock level drops below the set Reorder Level of 500 units)\n- Order Quantity Calculation (1. two months worth of sales, 2. it is guaranteed to be at least 500 (the Reorder Level) if the calculated amount is lower)\n- PO Generation and Record\n- Email to Supplier (PO)\n",
+        "height": 528,
+        "width": 1440,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -976,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "0b01e099-f30e-4bf2-bec3-0fd202fffaf4",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Stock Register": {
+      "main": [
+        [
+          {
+            "node": "Reorder Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reorder Logic": {
+      "main": [
+        [
+          {
+            "node": "IF Node (Reorder Check)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Node (Reorder Check)": {
+      "main": [
+        [
+          {
+            "node": "Create PO Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create PO Draft": {
+      "main": [
+        [
+          {
+            "node": "Send Low Stock Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 10:00 AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Stock Register",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Low Stock Alert": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "3jqlB5OlDQ3X7hiz",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "0046fcc5-8f9e-44db-9c8d-117ce6099aab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "3jqlB5OlDQ3X7hiz",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

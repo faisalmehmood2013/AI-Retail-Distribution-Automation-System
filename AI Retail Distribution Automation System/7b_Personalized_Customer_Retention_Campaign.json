@@ -1,0 +1,409 @@
+{
+  "name": "7b_Personalized_Customer_Retention_Campaign",
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": 20,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        192
+      ],
+      "id": "fdab59ea-d8bd-4323-9bc3-7efd990b42d3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        240
+      ],
+      "id": "75f964e7-d3ca-4e2c-b381-daf40c90e0ff"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        192
+      ],
+      "id": "d873f846-ea62-4f1f-8d9c-86cde004e401",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "// Parse OpenAI response into proper fields\nreturn $items().map(item => {\n    const content = item.json.choices[0].message.content; // adjust if using GPT-4/Chat mode\n    const parsed = JSON.parse(content); // convert JSON string to object\n\n    return {\n        json: {\n            CustomerID: item.json.CustomerID,\n            Name: item.json.Name,\n            subject: parsed.subject,\n            email_body: parsed.email_body,\n            coupon_code: parsed.coupon_code,\n            discount_percent: parsed.discount_percent,\n            urgency_text: parsed.urgency_text\n        }\n    };\n});\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        192
+      ],
+      "id": "e6a19854-a53b-43c1-907d-154bdc6b1c80",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "voWUrDxcEWPhvT1D",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        192
+      ],
+      "id": "19b3ef1f-c2c6-4377-b0d6-a7500fc2cc03",
+      "name": "Get Customer Detail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const customers = $input.all().map(item => item.json).filter(Boolean);\n\n// Get the current date and time\nconst now = new Date();\n\nreturn {\n  usersWithWeakPasswords: customers.map(customer => {\n    const name = customer[\"customer_name\"] || \"Customer\";\n    const totalSpend = customer[\"total_price\"] || 0;\n    \n    // 💡 MODIFICATION HERE: Calculating days since last purchase using the timestamp\n    let daysSinceLastPurchase = 0;\n    const purchaseTimestamp = customer[\"timestamp\"]; // Use the 'timestamp' key\n\n    if (purchaseTimestamp) {\n      const lastPurchaseDate = new Date(purchaseTimestamp);\n      \n      // Calculate the difference in milliseconds\n      const timeDifference = now.getTime() - lastPurchaseDate.getTime();\n      \n      // Convert milliseconds to days (1000ms * 60s * 60m * 24h)\n      daysSinceLastPurchase = Math.floor(timeDifference / (1000 * 60 * 60 * 24));\n    }\n    // -------------------------------------------------------------------\n\n    const discountPercent = totalSpend > 1000 ? 20 : 10;\n    const couponCode = `SAVE${discountPercent}`;\n    \n    // Urgency text logic still uses the 30-day threshold\n    const urgencyText = daysSinceLastPurchase > 10\n      ? \"Hurry, this offer expires soon!\"\n      : \"Take your time, this offer is valid for a while.\";\n\n    const subject = `Special offer for ${name}`;\n\n    // HTML email body with proper line breaks\n    const emailBody = `\n     <br><br>We have a special offer for you! Use the code <b>${couponCode}</b> at checkout to save <b>${discountPercent}%</b> on your next purchase.<br><br>\n      ${urgencyText}<br>\n    `;\n\n    return {\n      name,\n      subject,\n      emailBody,\n      discountPercent,\n      couponCode,\n      urgencyText,\n      // Added for verification\n      daysSinceLastPurchase: daysSinceLastPurchase\n    };\n  })\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        192
+      ],
+      "id": "e60b5b1c-6ff9-4d2c-b9ae-50f7def24ee5",
+      "name": "Calculate Personalized Discounts and Coupons"
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "={{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].subject }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Your Exclusive Customer Benefit</title>\n</head>\n\n<body style=\"font-family: Arial, sans-serif; background:#f2f4f7; padding:25px;\">\n\n  <div style=\"max-width:620px; margin:auto; background:#ffffff; padding:32px; border-radius:12px; border:1px solid #e2e8f0;\">\n    \n    <!-- Header -->\n    <h2 style=\"text-align:center; color:#0f172a; margin-bottom:25px; font-size:24px;\">\n      🌟 Exclusive Customer Benefit Just for You\n    </h2>\n\n    <!-- Intro -->\n    <p style=\"font-size:15px; color:#444; line-height:1.7;\">\n      Dear <strong>{{ $('Get Customer Detail').item.json.customer_name }}</strong>,\n      <br><br>\n      We are pleased to share a <strong>special benefit curated exclusively for you</strong>.  \n      Kindly review the details below:\n    </p>\n\n    <!-- Exclusive Benefit Section -->\n    <div style=\"background:#f8fafc; border:1px solid #e2e8f0; padding:20px; border-radius:8px; \n                font-size:15px; color:#333; line-height:1.7; margin-top:12px;\">\n      {{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].emailBody }}\n    </div>\n\n    <!-- Highlight Note -->\n    <p style=\"color:#b91c1c; font-size:15px; margin-top:22px; font-weight:600;\">\n      Please note: This exclusive benefit is available for a limited time.\n    </p>\n\n    <!-- Support Message -->\n    <p style=\"font-size:15px; color:#444; margin-top:28px; line-height:1.7;\">\n      If you need any assistance or would like to redeem this offer, feel free to reach out anytime.\n      We’re always here to help.\n    </p>\n\n    <!-- Footer -->\n    <p style=\"margin-top:28px; font-size:14px; color:#111;\">\n      Warm regards,<br>\n      <strong>Nestle Water Distribution</strong>\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1248,
+        48
+      ],
+      "id": "f711ebdf-0388-4583-894b-6091852fa204",
+      "name": "Send a message to customer",
+      "webhookId": "58af29b1-f763-4d7d-8135-3261c35ce766",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 958322280,
+          "mode": "list",
+          "cachedResultName": "Personalized Campaign Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=958322280"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Subject": "={{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].subject }}",
+            "EmailBody": "={{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].emailBody }}",
+            "CouponCode": "={{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].couponCode }}",
+            "DiscountPercent": "={{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].discountPercent }}",
+            "UrgencyText": "={{ $('Calculate Personalized Discounts and Coupons').item.json.usersWithWeakPasswords[0].urgencyText }}",
+            "Name": "={{ $('Get Customer Detail').item.json.customer_name }}",
+            "Email": "={{ $('Get Customer Detail').item.json.email }}",
+            "OrderID": "={{ $('Get Customer Detail').item.json.order_id }}",
+            "Timestamp": "={{$now}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "OrderID",
+              "displayName": "OrderID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "EmailBody",
+              "displayName": "EmailBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CouponCode",
+              "displayName": "CouponCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DiscountPercent",
+              "displayName": "DiscountPercent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "UrgencyText",
+              "displayName": "UrgencyText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1472,
+        48
+      ],
+      "id": "aa9ef5a2-6a5a-44ff-81e9-70ce42b8a669",
+      "name": "Add Personalized Campaign Logs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🎁 Step 16: Personalized Customer Retention Campaign\n- Trigger Schedule (e.g weekly or monthly)\n- Customer Segmentation\n                   1. High-Value Customer {Sale > 1000): Eligible for 20% discount.\n                  2. Standard Customer (Sale =< 1000): Eligible for 10% discount. \n- Offer Generation and Code Assignment (for the 20% offer, the code is SAVE20,  for the 10% offer, the code is SAVE10)\n- Urgency Messaging Logic \n                 1. If Days Since Last Sale > 10 days(A strong urgency message (e.g., \"Don't miss out, offer expires soon!\") is added to the email copy.)\n                 2. If Days Since Last Sale =< 10 days(No urgency message is included, maintaining a softer engagement approach.)\n- Targeted Email Dispatch\n\n**Objective:**\nTo use behavioral data to drive immediate sales and improve customer loyalty by recognizing purchase history.",
+        "height": 752,
+        "width": 1792,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "72111e21-42f8-4f85-9e27-267f59be60a2",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a message to customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Customer Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Detail": {
+      "main": [
+        [
+          {
+            "node": "Calculate Personalized Discounts and Coupons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Personalized Discounts and Coupons": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message to customer": {
+      "main": [
+        [
+          {
+            "node": "Add Personalized Campaign Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "qsYkmh922EHMUM8z",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "58d2ce26-4661-4a2e-a2bb-4e2b6906b938",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "qsYkmh922EHMUM8z",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

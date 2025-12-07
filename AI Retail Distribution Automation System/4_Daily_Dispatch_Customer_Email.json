@@ -1,0 +1,617 @@
+{
+  "name": "4_Daily_Dispatch_Customer_Email",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        928
+      ],
+      "id": "e6be0413-8e70-4c35-8459-e3b11920bc79",
+      "name": "Daily 07 AM Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Confirmed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        928
+      ],
+      "id": "c4df6de3-e95e-4de8-b590-b7736a8e8f77",
+      "name": "Customer Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function node: yeh code 'items' variable ko use karta hai jo pichle node se aata hai.\n\nif (!items || items.length === 0) {\n    console.log(\"No items found from the previous node.\");\n    return []; // Agar koi data nahi aaya to khali array wapas karein.\n}\n\nconst output = [];\nconst tomorrow = new Date();\ntomorrow.setDate(tomorrow.getDate() + 1); // Expected delivery date: Tomorrow\n\nfor (const item of items) {\n  const order = item.json;\n  \n  // Salesman Assignment (Aapko yeh logic apne hisaab se badalna hoga)\n  order['Salesman Name'] = 'Salesman Name'; \n  order['Salesman Contact'] = '0311111111'; \n  \n  order['Dispatch Date'] = new Date().toISOString().substring(0, 10); \n  order['Expected Delivery Date'] = tomorrow.toISOString().substring(0, 10);\n  order['Current Status'] = 'Out for Delivery';\n  order['Delivery Alert Sent?'] = 'NO';\n  order['Delivery Status Last Updated'] = new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' });\n  \n  output.push(item);\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        928
+      ],
+      "id": "6ebe0658-fcfa-4493-9ca1-5b7a1eded71d",
+      "name": "Delivery Person Details"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596419502,
+          "mode": "list",
+          "cachedResultName": "Dispatch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1596419502"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "dispatch_date": "={{ $json['Dispatch Date'] }}",
+            "delivery_person": "={{ $json['Salesman Name'] }}",
+            "delivery_contact": "={{ $json['Salesman Contact'] }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "customer_phone": "={{ $json.whatsapp_number }}",
+            "customer_email": "={{ $json.email }}",
+            "delivery_deadline": "={{ $json['Expected Delivery Date'] }}",
+            "current_status": "={{ $json['Current Status'] }}",
+            "alert_sent": "={{ $json['Delivery Alert Sent?'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dispatch_date",
+              "displayName": "dispatch_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_person",
+              "displayName": "delivery_person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_contact",
+              "displayName": "delivery_contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_phone",
+              "displayName": "customer_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "delivery_deadline",
+              "displayName": "delivery_deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "current_status",
+              "displayName": "current_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alert_sent",
+              "displayName": "alert_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        928
+      ],
+      "id": "045da6ae-4368-4beb-bf98-12de90ebd758",
+      "name": "Dispatch Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution Original",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "status": "Dispatched"
+          },
+          "matchingColumns": [
+            "order_id"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "quntity",
+              "displayName": "quntity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total_price",
+              "displayName": "total_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "landmark",
+              "displayName": "landmark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "payment_method",
+              "displayName": "payment_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "delivery_time_preference",
+              "displayName": "delivery_time_preference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        928
+      ],
+      "id": "5696472a-cebf-4c64-9dcc-c1359cc9807a",
+      "name": "Update Customer Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🚚 Step 05: Daily Dispatch and Customer Notification\n- Daily Trigger (07:00 AM) (to process all orders received from the previous day.)\n- Dispatch Sheet Creation (Salesperson's Name and Contact Details associated with the order.)\n- Status Update (immediately updated to \"Dispatched\" in the main Customer Orders Sheet.)\n- Customer Email Notification \n- Logistic Team Email Notification",
+        "height": 480,
+        "width": 1424,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        704
+      ],
+      "typeVersion": 1,
+      "id": "8ba7a442-456d-4602-bce0-f05caed3f786",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Dispatch Orders').item.json.customer_email }}",
+        "subject": "Your Order Has Been Dispatched – Delivery in 24–48 Hours",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Order Dispatched</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;\">\n  \n  <div style=\"max-width:600px; background:#ffffff; padding:25px; margin:auto; border-radius:10px; border:1px solid #e0e0e0;\">\n    \n    <h2 style=\"color:#333333; text-align:center; margin-bottom:20px;\">\n      📦 Your Order Has Been Dispatched\n    </h2>\n\n    <p style=\"font-size:15px; color:#555;\">\n      Dear Customer,\n      <br><br>\n      We are pleased to inform you that your order has been dispatched and is on its way to you.\n    </p>\n\n    <h3 style=\"color:#333;\">🚚 Delivery Details</h3>\n    <table style=\"width:100%; border-collapse:collapse; margin-top:10px;\">\n      <tr>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\"><strong>Delivery Rider:</strong></td>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\">{{ $('Dispatch Orders').item.json.delivery_person }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\"><strong>Contact Number:</strong></td>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\">{{ $('Dispatch Orders').item.json.delivery_contact}}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\"><strong>Estimated Delivery:</strong></td>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\">Within 24–48 hours</td>\n      </tr>\n    </table>\n\n    <h3 style=\"color:#333; margin-top:25px;\">🛍 Order Summary</h3>\n    <table style=\"width:100%; border-collapse:collapse; margin-top:10px;\">\n      <thead>\n        <tr style=\"background:#f0f0f0;\">\n          <th style=\"padding:10px; border:1px solid #ddd;\">Product Name</th>\n          <th style=\"padding:10px; border:1px solid #ddd;\">Qty</th>\n          <th style=\"padding:10px; border:1px solid #ddd;\">Amount</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <td style=\"padding:10px; border:1px solid #ddd;\">{{ $('Customer Orders').item.json.product_name }}</td>\n          <td style=\"padding:10px; border:1px solid #ddd;\">{{ $('Customer Orders').item.json.quntity }}</td>\n          <td style=\"padding:10px; border:1px solid #ddd;\">PKR {{ $('Customer Orders').item.json.total_price }}</td>\n        </tr>\n      </tbody>\n    </table>\n\n    <p style=\"font-size:15px; color:#555; margin-top:20px; line-height:1.6;\">\n      Thank you for shopping with us. If you have any questions or concerns, feel free to contact us.\n    </p>\n\n    <p style=\"text-align:center; color:#888; font-size:13px; margin-top:30px;\">\n      — This is an automated dispatch notification —\n    </p>\n\n  </div>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1728,
+        1024
+      ],
+      "id": "3d95d6ac-2308-4245-b785-287a4a79de6c",
+      "name": "Send a message to the Customer",
+      "webhookId": "bbfed895-25e2-45fb-bafd-5f6aec18a935",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shahfaisal1234@gmail.com",
+        "subject": "=  Stock Dispatch Required – Customer Order Ready",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Stock Dispatch Instruction</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;\">\n  \n  <div style=\"max-width:600px; background:#ffffff; padding:25px; margin:auto; border-radius:10px; border:1px solid #e0e0e0;\">\n    \n    <h2 style=\"color:#333333; text-align:center; margin-bottom:20px;\">\n      🚚 Stock Dispatch Required\n    </h2>\n\n    <p style=\"font-size:15px; color:#555;\">\n      Dear Logistics Team,<br><br>\n      Please arrange the dispatch of the following customer order as soon as possible.\n    </p>\n\n    <!-- CUSTOMER DETAILS -->\n    <h3 style=\"color:#333;\">📄 Customer Details</h3>\n    <table style=\"width:100%; border-collapse:collapse; margin-top:10px;\">\n      <tr>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\"><strong>Customer Name:</strong></td>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\">{{ $('Customer Orders').item.json.customer_name }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\"><strong>Customer Contact:</strong></td>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\">{{ $('Customer Orders').item.json.whatsapp_number }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\"><strong>Delivery Address:</strong></td>\n        <td style=\"padding:8px; border-bottom:1px solid #ddd;\">{{ $('Customer Orders').item.json.address }}</td>\n      </tr>\n    </table>\n\n    <!-- ORDER SUMMARY -->\n    <h3 style=\"color:#333; margin-top:25px;\">📦 Order Summary</h3>\n    <table style=\"width:100%; border-collapse:collapse; margin-top:10px;\">\n      <thead>\n        <tr style=\"background:#f0f0f0;\">\n          <th style=\"padding:10px; border:1px solid #ddd;\">Product Name</th>\n          <th style=\"padding:10px; border:1px solid #ddd;\">Qty</th>\n          <th style=\"padding:10px; border:1px solid #ddd;\">Amount</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <td style=\"padding:10px; border:1px solid #ddd;\">{{ $('Customer Orders').item.json.product_name }}</td>\n          <td style=\"padding:10px; border:1px solid #ddd;\">{{ $('Customer Orders').item.json.quntity }}</td>\n          <td style=\"padding:10px; border:1px solid #ddd;\">PKR {{ $('Customer Orders').item.json.total_price }}</td>\n        </tr>\n      </tbody>\n    </table>\n\n    <!-- SPECIAL NOTE -->\n    <p style=\"font-size:15px; color:#555; margin-top:20px;\">\n      Kindly ensure proper packing, rider assignment, and timely dispatch.\n    </p>\n\n    <p style=\"font-size:15px; color:#444; margin-top:10px;\">\n      <strong>Priority:</strong> High  \n      <br>\n      <strong>Requested By:</strong> Automated Sales System\n    </p>\n\n    <!-- FOOTER -->\n    <p style=\"text-align:center; color:#888; font-size:13px; margin-top:30px;\">\n      — Internal Dispatch Instruction —<br>\n      Nestle Water Distribution Multan\n    </p>\n\n  </div>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1728,
+        832
+      ],
+      "id": "9bcf7079-e6e3-4712-8a60-87bc4d74b207",
+      "name": "Send a message to logistic team",
+      "webhookId": "11fd297c-cd85-4c52-8e21-799e596fbc54",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0BmNIbP17JywGsPt",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 07 AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Customer Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Orders": {
+      "main": [
+        [
+          {
+            "node": "Delivery Person Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Person Details": {
+      "main": [
+        [
+          {
+            "node": "Dispatch Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dispatch Orders": {
+      "main": [
+        [
+          {
+            "node": "Update Customer Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Customer Orders": {
+      "main": [
+        [
+          {
+            "node": "Send a message to the Customer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message to logistic team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message to the Customer": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "EkwKaV8KBtK7aJPN",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "5de08d39-e15d-4598-8416-30ba84806a44",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "EkwKaV8KBtK7aJPN",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}

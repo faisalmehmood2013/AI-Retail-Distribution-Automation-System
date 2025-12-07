@@ -1,0 +1,4 @@
+# AI Autmation Tool
+# n8n
+flask
+ipykernel

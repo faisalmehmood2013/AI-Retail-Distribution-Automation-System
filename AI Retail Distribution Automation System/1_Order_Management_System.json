@@ -1,0 +1,437 @@
+{
+  "name": "1_Order_Management_System",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335712669,
+          "mode": "list",
+          "cachedResultName": "Stock Register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=1335712669"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        64
+      ],
+      "id": "e28cbdaf-2a84-4a0c-a793-e0f54c25d4ae",
+      "name": "Stock Register",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        288,
+        64
+      ],
+      "id": "c6ba2a76-3a64-498d-9d53-d25db9af75cc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "voWUrDxcEWPhvT1D",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a smart ordering assistant for “Nestlé Water Distribution”.\nYou will use data from the Google Sheet (Products, Stock, Prices, Orders).\n\n1. When a customer sends a first message (hi, hello, salam, hey), reply with:\n\n\"Hello! 👋\nWelcome to Nestlé Water Distribution.\nHow can we assist you today?\n\n1️⃣ View Product List\n2️⃣ Place a New Order\n3️⃣ Check Order Status\n4️⃣ Stock / Inventory Information\n5️⃣ FAQ / General Information\n6️⃣ Talk to Customer Support\n\nPlease reply with the option number.\"\n\n2. If customer selects “1 — View Product List”:\n\nFetch product list & prices from Google Sheet\n\nReply like this:\n\n\"Here is our Nestlé Water product list 💧:\n\n• 🔢 ID: [Product ID]\n🥤 Product: [Product Name] – [Size]\n💰 Price: Rs [Price] per unit\n\n• 🔢 ID: [Product ID]\n🥤 Product: [Product Name] – [Size]\n💰 Price: Rs [Price] per unit\n\n• 🔢 ID: [Product ID]\n🥤 Product: [Product Name] – [Size]\n💰 Price: Rs [Price] per unit\n\nTo continue, please tell me the Product ID and the quantity you want.\"\n(You will replace with actual data from the Sheet.)\n\n3. If customer selects “2 — Place a New Order”:\n\nAsk the customer for details step-by-step:\n\nStep 1 — Ask for Customer Name\n\n\"Please share your full name to continue with your order.\"\n\nStep 2 — Ask for WhatsApp Number\n\n\"Kindly share your complete WhatsApp number with country code (e.g., +92XXXXXXXXXX), or confirm if this number is correct.\"\n\n(If using WhatsApp Cloud API: auto-capture number but still confirm.)\n\nStep 3 — Ask for Email\n“Kindly share your active email address (e.g., name@example.com), or confirm if this email is correct.”\n\nStep 4 — Ask for Customer Address\n\n\"Please send your complete delivery address, including street, area, and city.\"\n\nStep 5 — Ask for Product ID\n\n\"Great 👍\nNow please send the Product ID of the item you want to order.\"\n\nExample:\nID 103\n\n❗ If Product ID is NOT found in the Google Sheet\n\nReply:\n\n\"❌ Invalid Product ID\nThe Product ID you entered does not exist.\nPlease check the list and send a valid Product ID.\"\n\nThen send the list with Product IDs:\n\n\"Here are the available items:\n\n• [ID 101] — [Product Name] — [Size]\n• [ID 102] — [Product Name] — [Size]\n• [ID 103] — [Product Name] — [Size]\n\nPlease select a valid Product ID.\"**\n\nStep 6 — Ask for Quantity\n\n\"How many units would you like to order?\"\n\nExample:\nQuantity: 5\n\n🔍 Stock Checking Logic (Google Sheet)\n\nAfter receiving Product ID + Quantity:\n\nLookup Product ID\n\nFetch:\n\nProduct Name\n\nSize\n\nUnit Price\n\nAvailable Stock\n\n✔ If Stock Is Available\n\nReply:\n\n**\"Your order is verified! ✅\n\n• Product: [Product Name]\n• Size: [Size]\n• Product ID: [Product ID]\n• Quantity: [Quantity]\n• Unit Price: Rs [Price]\n• Total Amount: Rs [Price × Quantity]\n• Delivery Address: [Customer Address]\n\nPlease confirm your order by replying:\nYes, confirm\"**\n\n❌ If Stock Is NOT Available\n\nReply:\n\n\"Sorry 😔\n[Product Name] is currently out of stock.\"\n\nThen show available products with IDs:\n\n\"Here are the available items:\n\n• [ID 101] — [Product Name] — [Size]\n• [ID 102] — [Product Name] — [Size]\n• [ID 103] — [Product Name] — [Size]\n\nPlease select another Product ID.\"**\n\n📌 Order Confirmation Message\n\nIf customer replies “Yes, confirm”:\n\n**\"Your order has been successfully confirmed! 🎉\n\nOur delivery team will contact you shortly.\n\nThank you for choosing Nestlé Water Distribution 💧\"**\n\n🗂 Save Order to Google Sheet (MANDATORY FIELDS)\n\nWhen order is confirmed, save:\n\nAuto Order ID\n\nDate & Time\n\nCustomer Name\n\nWhatsApp Number\n\nEmail\n\nFull Address\n\nLandmark (if provided)\n\nPreferred Delivery Time\n\nPayment Method\n\nProduct ID\n\nProduct Name\n\nSize\n\nQuantity\n\nUnit Price\n\nTotal Price\n\nStatus: Confirmed\n\nDescription: Order accepted (in stock)\n\nIf rejected:\n\nStatus: Rejected\n\nDescription: Order rejected (out of stock)\n\n🔥 Extra Recommended Questions (Highly Useful)\n\nAsk these after address or before final confirmation:\n\n🏷 Landmark\n\n\"For faster delivery, please share a nearby landmark.\"\n\n🕒 Delivery Preference\n\n\"What delivery time do you prefer: Morning, Afternoon, or Evening?\"\n\n💵 Payment Method\n\n\"Please select your preferred payment method:\n• Credit\n• Cash on Delivery\n• Bank Transfer\n• JazzCash / Easypaisa\"\n\n\n🧩 FULL WHATSAPP ORDER FLOW (READY TO USE)\n\n1️⃣ Ask Name\n2️⃣ Ask WhatsApp Number\n3️⃣ Ask Address\n4️⃣ Ask Landmark\n5️⃣ Ask Delivery Time\n6️⃣ Ask Payment Method\n7️⃣ Ask Product ID\n8️⃣ If wrong ID → send available IDs\n9️⃣ Ask Quantity\n🔟 Check stock\n11️⃣ If available → ask for confirmation\n12️⃣ If confirmed → save order + send final confirmation\n\n4. If customer selects “3 — Check Order Status”:\n\nAsk for:\n• Order ID OR\n• Phone number\n\nLook up in Orders Sheet.\nReply with the exact status:\n\n(Confirmed / Pending / Rejected / Cancelled / Delivered)\n\n5. If customer selects “4 — Stock / Inventory Information”:\n\nAsk for product name and product id.\n\nCheck stock in Google Sheet.\nReply:\n\n• “Yes, [item] is in stock.”\nor\n• “Item is out of stock. Available items: [list]”\n\nIf user asks, also send available quantity.\n\n6. If customer selects “5 — FAQ / General Information”:\n\nReply short like a WhatsApp chat. Include:\n\n• Delivery timings\n• Delivery areas\n• Payment method (cash/bank/JazzCash)\n• Minimum order quantity\n• Breakage or replacement policy\n• How to track orders\n• Stock update schedule\n• Bulk order / wholesale pricing information\n• How to register as a regular customer\n\n7. If customer selects “6 — Talk to Customer Support”:\n\nReply:\n\n\"Sure!\nPlease tell me your issue.\nFor urgent help, contact support at: +92 XX XXXXXXXX\"\n\n8. If customer says “cancel order”:\n\nReply politely:\n\n\"Sorry ⚠️\nI cannot cancel orders directly.\nPlease contact the manager to cancel your order:\n\nManager Contact: +92 XX XXXXXXXX\"\n\n9. General WhatsApp Style Rules:\n\n• Keep messages short\n• No bold text\n• Use stars for light emphasis\n• Friendly, simple tone\n• No long paragraphs\n• Sounds like a human, not a website"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        416,
+        -160
+      ],
+      "id": "6fbd22c5-f96a-4c5f-b42b-c2f0ba7ff252",
+      "name": "Order Management Agent"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        64,
+        -160
+      ],
+      "id": "5a288f64-d1e1-489e-9af8-c3e3f34acee3",
+      "name": "When chat message received",
+      "webhookId": "60ed0f66-b0ed-4fba-b2bf-fc34e2cbb3dd"
+    },
+    {
+      "parameters": {
+        "content": "## 💬 Step 01: Customer Order via Chat\n- Customer Initiates\n- Permissible Channels (WhatsApp, Other Chat Apps, Website Live Chat)\n- Order Placement\n- Confirmation\n",
+        "height": 576,
+        "width": 832,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "9b4101d7-5ed1-433f-814a-68720f171737",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        64
+      ],
+      "id": "43b79693-707c-4c39-883f-2c45a983e0c4",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY",
+          "mode": "list",
+          "cachedResultName": "Nestle Water Distribution",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2067616426,
+          "mode": "list",
+          "cachedResultName": "Customer Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/136hUtEhHlHiYF7l7zNZtCEo05d5B_8I5VuZqad_5RHY/edit#gid=2067616426"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ new Date().toISOString() }}\n",
+            "product_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('product_id', ``, 'string') }}",
+            "quntity": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('quntity', ``, 'string') }}",
+            "customer_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_name', ``, 'string') }}",
+            "whatsapp_number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('whatsapp_number', ``, 'string') }}",
+            "address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('address', ``, 'string') }}",
+            "payment_method": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('payment_method', ``, 'string') }}",
+            "delivery_time_preference": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('delivery_time_preference', ``, 'string') }}",
+            "status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('status', ``, 'string') }}",
+            "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('description', ``, 'string') }}",
+            "product_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('product_name', ``, 'string') }}",
+            "size": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('size', ``, 'string') }}",
+            "category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category', ``, 'string') }}",
+            "price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('price', ``, 'string') }}",
+            "total_price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('total_price', ``, 'string') }}",
+            "landmark": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('landmark', ``, 'string') }}",
+            "order_id": "={{ \"Ord-\" + Date.now() }}",
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "quntity",
+              "displayName": "quntity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total_price",
+              "displayName": "total_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "landmark",
+              "displayName": "landmark",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payment_method",
+              "displayName": "payment_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_time_preference",
+              "displayName": "delivery_time_preference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        64
+      ],
+      "id": "b6fe9e9a-a5f2-4c4b-a8b3-bdac94e988db",
+      "name": "Save Customer Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITuEKJjgBfUpaHYr",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Stock Register": {
+      "ai_tool": [
+        [
+          {
+            "node": "Order Management Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Order Management Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Management Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Order Management Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Order Management Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Customer Orders": {
+      "ai_tool": [
+        [
+          {
+            "node": "Order Management Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 3600,
+    "availableInMCP": false,
+    "errorWorkflow": "ZAfbMmbIIF063ewF",
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "d48c9923-2abf-46d0-8b49-608a8c2c03f1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da262493ba5cba18ce299519af91bd3bf3ef9b6b9538b99fcc483a06923f1abc"
+  },
+  "id": "ZAfbMmbIIF063ewF",
+  "tags": [
+    {
+      "updatedAt": "2025-12-02T17:35:34.543Z",
+      "createdAt": "2025-12-02T17:35:34.543Z",
+      "id": "issaJewl9SrpS5uV",
+      "name": "DMS"
+    }
+  ]
+}
