@@ -86,7 +86,7 @@ This project is built on a robust, integrated stack, detailing the function of e
 * Customers are instructed to place an order by clicking the **Chat Button** located in the bottom-right corner of the screen.
 * The **Order Assistant** (Chatbot) is readily available on the homepage, listing available products with their **Product ID**, **Price**, and **Quantity**.
 * This setup allows customers to interact directly with the chatbot to place their order.
-> ![home](Screenshots/home%20Website.png)
+> ![home Website](Screenshots/home%20Website.png)
 > ![chat home](Screenshots/chat%20home.png)
 
 ---
