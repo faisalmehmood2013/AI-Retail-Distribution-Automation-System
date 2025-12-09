@@ -18,7 +18,13 @@ This robust automation guarantees maximum operational efficiency, minimizes manu
 
 ## 🎥 Project Demonstration & Overview
 
-[▶️ Watch the Complete Demonstration Video Here (Retail Automation System)](RetailAutomationTemplate/video.mp4)
+<!-- [▶️ Watch the Complete Demonstration Video Here (Retail Automation System)](RetailAutomationTemplate/video.mp4) -->
+
+<video width="100%" controls>
+  <source src="RetailAutomationTemplate/video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 
 ---
 
@@ -50,6 +56,12 @@ A professionally structured overview for quick navigation across the 17-step Aut
         * Step 15: Proactive Clearance Discount Campaign
         * Step 16: Personalized Customer Retention Campaign
         * Step 17: Automated Customer Feedback Loop
+3. **⚙️ Credentials and API Configuration**
+    * 3.1. **Google Cloud Project Setup (Prerequisite)**
+    * 3.2. **Google Sheets and Forms Integration**
+    * 3.3. **Gmail / Email Dispatch Service**
+    * 3.4. **Google Gemini Chat Model**
+4. **💰 Project Cost Estimation (Monthly)**
 
 ---
 
@@ -80,12 +92,16 @@ This project is built on a robust, integrated stack, detailing the function of e
 
 ---
 
-#### **Website & Order Placement Context**
+#### **Customer Interface and Order Placement**
 
-* The company's website (Nestlé Water Distribution) promotes **Premium Water Solutions**.
-* Customers are instructed to place an order by clicking the **Chat Button** located in the bottom-right corner of the screen.
-* The **Order Assistant** (Chatbot) is readily available on the homepage, listing available products with their **Product ID**, **Price**, and **Quantity**.
-* This setup allows customers to interact directly with the chatbot to place their order.
+The entire automation workflow is initiated via the customer interface promoting **Premium Water Solutions**.
+
+| Detail | Description |
+| :--- | :--- |
+| **Website URL** | **[Nestlé Water Distribution Customer Portal](https://flask-app-pi-liart.vercel.app/)** |
+| **Order Initiation** | The customer clicks on the provided website link. Upon arrival, they place their order by clicking the **Chat Button** located in the bottom-right corner of the screen. |
+| **Order Assistant** | The **Order Assistant** (Chatbot) is readily available on the homepage, listing available products with their **Product ID**, **Price**, and **Quantity** options. |
+| **Action** | Customers interact directly with the chatbot to place and finalize their order, triggering **Step 01: Customer Order via Chat**. |
 > ![home](Screenshots/Home%20Website.png)
 > ![chat home](Screenshots/chat%20home.png)
 
@@ -659,6 +675,88 @@ This project is built on a robust, integrated stack, detailing the function of e
 > A final communication confirming: **"Your Feedback Has Been Resolved"** after necessary actions have been taken.
 > ![Update on your feedback: Delivery issue (15c_Email Customer feedback updated.png)](Screenshots/15c_Email%20Customer%20feedback%20updated.png)
 
+---
+
+## ⚙️ 3. Credentials and API Configuration
+
+This section outlines the necessary credentials and APIs required to securely operate the 17-Step Full Business Automation system. All configurations must be managed through the secure **Credential Management System** of your automation platform (e.g., n8n).
+
+### 3.1. Google Cloud Project Setup (Prerequisite)
+
+All core Google services (Sheets, Forms, Gmail) rely on a unified **OAuth 2.0 Client** created within your Google Cloud Platform (GCP) Project.
+
+1.  **Enable APIs:** Ensure the following APIs are **enabled** in your GCP Project:
+    * **Google Sheets API**
+    * **Gmail API**
+    * **Google Drive API** (for document handling/invoicing)
+2.  **Create OAuth Client ID:** In GCP (**APIs & Services > Credentials**), create an **OAuth Client ID** (Type: Web application or Desktop app).
+3.  **Record Credentials:** Securely note down the generated **Client ID** and **Client Secret**.
+4.  **Setup Redirect URIs:** Add the necessary **Redirect URI** provided by your automation platform (e.g., `https://[your-n8n-instance-url]/rest/oauth2-credential/callback`) to your OAuth Client ID settings in GCP.
+
+### 3.2. Google Sheets and Forms Integration
+
+Used for all database operations (Stock Register, Orders, P&L) and reading form submissions (Delivery Confirmation, Feedback).
+
+| Detail | Description |
+| :--- | :--- |
+| **Credential Type** | **OAuth 2.0** (Client ID & Client Secret) |
+| **Location in Workflow** | Data interaction nodes (Read, Write, Update) across all steps (01-17). |
+| **Setup** | Use the **Client ID** and **Client Secret** to configure the Google Sheets/Forms credential in your automation platform. Complete the **OAuth Consent Flow** by logging in with the account that has **Editor/Owner** access to all Sheets/Forms. |
+
+### 3.3. Gmail / Email Dispatch Service
+
+Used for all customer notifications, alerts, and report dispatches.
+
+| Detail | Description |
+| :--- | :--- |
+| **Credential Type** | **OAuth 2.0** (Client ID & Client Secret) |
+| **Location in Workflow** | All email dispatch steps (02, 03, 04, 05, 06, 12, 13, 14, 15, 16, 17). |
+| **Setup** | Configure the Gmail node using the same **Client ID** and **Client Secret**, and complete the **OAuth Consent Flow** to grant permission for sending emails. |
+
+### 3.4. Google Gemini Chat Model
+
+The core AI functions (Order Parsing - Step 01, PO Management - Step 03) rely on the Google Gemini API.
+
+| Detail | Description |
+| :--- | :--- |
+| **Credential Type** | **API Key** (Recommended for direct integration) |
+| **Location in Workflow** | Integrated directly within the **Order Management** and **Purchase Order Management** nodes (Steps 01 and 03). |
+| **Setup** | Obtain your dedicated **Gemini API Key** from Google AI Studio. Set this API Key as a **Global Credential** or a secure environment variable (`GEMINI_API_KEY`) within your automation platform. |
+
+***
+
+> ⚠️ **Security Note:** All **Client IDs, Client Secrets, and API Keys** must be stored and accessed *only* via the secure **Credential Management System** of your automation platform to protect against unauthorized access.
+
+## 4. 💰 Project Cost Estimation (Monthly)
+
+This estimation covers the monthly operational costs based on a high volume of **1,000 Customer Orders** per month.
+
+| Component | Free Tier Status | Estimated Monthly Cost | Notes |
+| :--- | :--- | :--- | :--- |
+| **I. Infrastructure (Choose ONE)** | | | **Hosting the Automation Engine (n8n)** |
+| **Option A: Self-Hosted (Basic VPS)** | Partially Free | **Approximately \$5.00 - \$20.00** | Budget-friendly VPS. Requires internal management of security and uptime. |
+| **Option B: Dedicated n8n Cloud** | Not Free | **Approximately \$20.00 - \$50.00+** | Managed hosting solution (n8n Starter/Pro plan). |
+| **Option C: Public Cloud (AWS/GCP)** | Free for 12 months | **Approximately \$15.00 - \$30.00** | Based on a low-spec VM instance after the free tier expires. |
+| **II. Core Services & Database** | | | |
+| **Google Sheets & Forms** | **FREE** | **\$0.00** | Free for all data storage and collection needs. |
+| **Gmail / Email Dispatch** | **FREE** | **\$0.00** | Free tier is sufficient for standard email volume. |
+| **III. API Usage Costs (High Volume Scenario)** | | | **1,000 Orders / 10 POs / Month** |
+| **Google Gemini Chat Model** | Partially Free | **Approximately \$5.00 - \$10.00** | Cost is highly dependent on **token consumption**. |
+| **Other Google APIs (Sheets, Drive, etc.)** | **FREE** | **\$0.00** | Standard usage is free. |
+
+### Total Monthly Cost Breakdown
+
+| Hosting Option | Infrastructure Cost (Min) | API Usage Cost (Min) | **Total Monthly Cost (Minimum)** |
+| :--- | :--- | :--- | :--- |
+| **Option A: Self-Hosted (VPS)** | Approx. \$5.00 | Approx. \$5.00 | **Approximately \$10.00** |
+| **Option B: Dedicated n8n Cloud** | Approx. \$20.00 | Approx. \$5.00 | **Approximately \$25.00** |
+| **Option C: Public Cloud (AWS/GCP)**| Approx. \$15.00 | Approx. \$5.00 | **Approximately \$20.00** |
+
+---
+
+### 📝 Important Note on Cost
+
+> **All figures provided are approximate estimates** and are subject to fluctuation based on currency conversion rates, hosting provider charges, and the specific rate of AI token consumption by the Gemini Model.
 ---
 
 ## 💡 Project Conclusion
