@@ -99,7 +99,7 @@ The entire automation workflow is initiated via the customer interface promoting
 
 | Detail | Description |
 | :--- | :--- |
-| **Website URL** | **[Nestlé Water Distribution Customer Portal](https://flask-app-pi-liart.vercel.app/)** |
+| **Website URL** | **[Nestlé Water Distribution Customer Portal](https://ai-retail-distribution.vercel.app/)** |
 | **Order Initiation** | The customer clicks on the provided website link. Upon arrival, they place their order by clicking the **Chat Button** located in the bottom-right corner of the screen. |
 | **Order Assistant** | The **Order Assistant** (Chatbot) is readily available on the homepage, listing available products with their **Product ID**, **Price**, and **Quantity** options. |
 | **Action** | Customers interact directly with the chatbot to place and finalize their order, triggering **Step 01: Customer Order via Chat**. |
@@ -188,6 +188,7 @@ The same chat mechanism is utilized by the Company Owner and Manager for crucial
 
 | Detail | Description |
 | :--- | :--- |
+| **Website URL** | **[Nestlé Water Distribution Customer Portal](https://ai-retail-distribution.vercel.app/inventory)** |
 | **Live Inventory Visibility** | The owner/manager can access the **Inventory Tab** via the internal portal, which displays **Live Inventory Data** synchronized with the system's database. |
 | **Purchase Order (PO) Creation** | The owner or manager initiates and approves a **Purchase Order (PO)** directly through the **Chat Interface**. This triggers **Step 03: Purchase Order (PO) and Supplier Communication**. |
 | **Stock Receiving Process** | When stock is physically received, the owner or manager processes the receipt and updates the inventory level via the **Chat Interface**. This automated chat input ensures immediate updating of the Stock Register. |
