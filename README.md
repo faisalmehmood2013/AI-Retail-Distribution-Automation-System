@@ -18,12 +18,12 @@ This robust automation guarantees maximum operational efficiency, minimizes manu
 
 ## 🎥 Project Demonstration & Overview
 
-<!-- [▶️ Watch the Complete Demonstration Video Here (Retail Automation System)](RetailAutomationTemplate/video.mp4) -->
-
 <video width="100%" controls>
   <source src="RetailAutomationTemplate/video.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
+
+[▶️ Watch the Complete Demonstration Video Here (Retail Automation System)](RetailAutomationTemplate/video.mp4)
 
 
 ---
