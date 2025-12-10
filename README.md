@@ -103,8 +103,18 @@ The entire automation workflow is initiated via the customer interface promoting
 | **Order Initiation** | The customer clicks on the provided website link. Upon arrival, they place their order by clicking the **Chat Button** located in the bottom-right corner of the screen. |
 | **Order Assistant** | The **Order Assistant** (Chatbot) is readily available on the homepage, listing available products with their **Product ID**, **Price**, and **Quantity** options. |
 | **Action** | Customers interact directly with the chatbot to place and finalize their order, triggering **Step 01: Customer Order via Chat**. |
-> ![home](Screenshots/Home%20Website.png)
-> ![chat home](Screenshots/chat%20home.png)
+
+🌐 **Customer View: Homepage and Chat Initiation**
+
+The interface clearly displays the products and guides the user to the chat for ordering.
+
+![Website Homepage showing Premium Water Solutions and Order Instructions](Screenshots/Home%20Website.png)
+
+🤖 **Order Assistant Interface**
+
+The integrated Chatbot provides a product list, allowing for interactive order placement which is immediately processed by the Gemini Model (Step 01).
+
+![Chatbot Interface showing Order Assistant, Product IDs, and Pricing](Screenshots/chat%20home.png)
 
 ---
 
