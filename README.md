@@ -72,11 +72,10 @@ A professionally structured overview for quick navigation across the 17-step Aut
 1.  **🧰 Tools & Technologies Used**
 2.  **🚀 Key Features & Detailed Workflow**
     * 2.0. **System Interfaces and Context Setting**
+        * Access Control Logic
         * Centralized Portal Access (Home Page)
-        * Customer Interface and Order Placement
-        * Live Inventory & PO Creation Portal (For Management)
-        * Management Dashboard & Analytics
-        * Contact and Support Interface
+        * Customer & Order Interface (Public View)
+        * Management & Analytics Portal (Admin View)
     * 2.1. **🛒 Smart Customer Ordering & Invoicing (Steps 01-02)**
         * Step 01: Customer Order via Chat
         * Step 02: Invoice Process & Email to Customer
@@ -131,11 +130,71 @@ This project is built on a robust, integrated stack, detailing the function of e
 
 ## 2. 🚀 Key Features & Detailed Workflow
 
-### 2.0. System Interfaces and Context Setting
+### 2.0. System Interfaces and Context Setting 🔐
+---
+
+To ensure data security and operational focus, the portal implements **Role-Based Access Control (RBAC)**. The interface dynamically adjusts based on the user's login credentials.
+
+#### 👥 Access Control Logic
+
+| User Role | Authentication | Accessible Tabs | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Customer / Guest** | Email Registration | **Home, Orders, Contact** | Placing orders, tracking personal history, and support. |
+| **Owner / Manager** | Administrative Login | **Dashboard, Inventory, Live Tracking, Orders** | Full system oversight, financial audits, and supply chain management. |
 
 ---
 
-To provide complete visual and functional context, the following interfaces are used by customers and management to interact with the automation workflow.
+#### 🏠 Centralized Portal Access (Home Page)
+
+The Home page serves as the gateway. While all users land here, the navigation bar and action cards are filtered based on the authenticated role.
+
+
+
+| Feature | Role Access | Corresponding Workflow |
+| :--- | :--- | :--- |
+| **Dashboard & Analytics** | 🔑 Admin Only | **Inventory & Financial Intelligence** (Steps 08-13) |
+| **Inventory & Stock Control**| 🔑 Admin Only | **Automated Purchasing & Inventory Alerts** (Steps 03-04) |
+| **Product Ordering & Sales** | ✅ All Users | **Smart Customer Ordering & Invoicing** (Steps 01-02) |
+| **Support & Contact** | ✅ All Users | **Personalized CRM & Marketing** (Step 17) |
+
+![Home Page](Screenshots/home.png)
+
+---
+
+#### 🛒 Customer & Order Interface (Public View)
+
+Once a customer registers via email, they are guided to a simplified view focused on procurement.
+
+* **📦 Orders Tab:** Allows users to browse the catalog and initiate the AI Chatbot.
+* **📩 Contact Tab:** For partnership inquiries or support tickets.
+
+**📦 Orders Tab**
+![Customer Orders Tab](Screenshots/orderstab.png)
+
+**📩 Contact Tab**
+![Contact Tab](Screenshots/contacttab.png)
+
+
+---
+
+#### 🏭 Management & Analytics Portal (Admin View)
+
+Upon administrative login, the **Dashboard** and **Inventory** tabs become visible, providing the "Command Center" for the business.
+
+* **📊 Live Tracking & Dashboard:** Real-time visibility into sales, profit/loss, and delivery status.
+* **📦 Inventory & PO Chat:** High-level tools for stock management and supplier communication.
+
+**🏭 Management & Analytics Portal (Admin View)**
+![Home Page Owner](Screenshots/homeownertab.png)
+
+**📊 Live Tracking & Dashboard**
+![Dashboard Tab](Screenshots/dashboardtab.png)
+
+**📦 Inventory & PO Chat**
+![Inventory Tab](Screenshots/inventorytab.png)
+
+
+<!-- To provide complete visual and functional context, the following interfaces are used by customers and management to interact with the automation workflow.
 
 #### 1. 🏠 Centralized Portal Access (Home Page)
 
@@ -219,7 +278,7 @@ The Contact tab is a critical channel for communication, particularly for non-or
 | **Website URL** | **[Contact Us Portal](https://ai-retail-distribution.vercel.app/contact)** |
 | **Send us a Message Form** | Directly feeds into the system for **Step 17: Automated Customer Feedback Loop** and general support inquiries. |
 
-![Contact Tab](Screenshots/contacttab.png)
+![Contact Tab](Screenshots/contacttab.png) -->
 
 ---
 
