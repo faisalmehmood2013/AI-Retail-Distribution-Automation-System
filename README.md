@@ -989,7 +989,7 @@ The implementation of these workflows has yielded the following significant resu
 
 ---
 
-## 🙏 Acknowledgements and Guidance
+<!-- ## 🙏 Acknowledgements and Guidance
 
 I would like to extend my **sincerest and profound gratitude** to the exceptional mentors and guides whose invaluable support, expertise, and continuous guidance were instrumental in shaping and successfully delivering this comprehensive AI Retail Distribution Automation System.
 
@@ -998,4 +998,4 @@ I would like to extend my **sincerest and profound gratitude** to the exceptiona
 | **Strategic Architect & Workflow Mentor** | **Sir Zaffar** | Provided complete, in-depth guidance on the project's architecture, including mastering the complex end-to-end workflow design and strategic vision. |
 | **Motivation & Guiding Spirit** | **Sir Hisham** | Offered invaluable motivation, instilling a 'Yes I Can' mindset (inspired by LCT 2), crucial for driving the project to successful completion. |
 
-Your collective expertise and unwavering commitment served as the **driving force** and foundational support behind the successful completion of this ambitious project.
+Your collective expertise and unwavering commitment served as the **driving force** and foundational support behind the successful completion of this ambitious project. -->
